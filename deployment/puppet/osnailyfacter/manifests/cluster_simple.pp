@@ -304,7 +304,11 @@ class osnailyfacter::cluster_simple {
       }
 
       #ADDONS END
-
+       if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.pivot_scheduler.PivotScheduler' ) {
+        include dcrm
+        include dcrm::controller
+      } 
+      #FIXME add Pulsar
     }
 
     "compute" : {
@@ -362,6 +366,14 @@ class osnailyfacter::cluster_simple {
       if ($::use_ceph){
         Class['openstack::compute'] -> Class['ceph']
       }
+ #ADDONS XIFI START
+      if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.pivot_scheduler.PivotScheduler' ) {
+        include dcrm
+        include dcrm::compute
+      }  
+      #ADDONS XIFI END
+      #FIXME add Pulsar
+
     } # COMPUTE ENDS
 
     "cinder" : {
