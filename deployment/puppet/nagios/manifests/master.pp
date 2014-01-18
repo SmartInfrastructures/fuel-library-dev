@@ -35,6 +35,8 @@ $masterdir         = $nagios::params::nagios_os_name,
 $htpasswd_file     = $nagios::params::htpasswd_file,
 ) inherits nagios::params {
 
+  notify { "***** Beginning deployment of nagios master on host ${::hostname} *****": }
+
   $master_proj_name = "${proj_name}_master"
 
   validate_hash($htpasswd)
@@ -46,6 +48,7 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
   if $nginx == true {
     include nagios::nginx
   }
+
   include nagios::host
   include nagios::service
   include nagios::command
@@ -58,6 +61,7 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
       unless  => 'dpkg-statoverride --list nagios nagios 751 /var/lib/nagios3 && dpkg-statoverride --list nagios www-data 2710 /var/lib/nagios3/rw',
       notify  => Service[$masterservice],
     }
+    #temp - we will fix the iso ;)
   }
 
   # Bug: 3299
@@ -70,7 +74,7 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
 
   package {$nagios3pkg:}
 
-  if $rabbitmq == true {
+  if  $::osfamily == 'RedHat' and $rabbitmq == true {
     package {'nagios-plugins-os-rabbitmq':
       require => Package[$nagios3pkg]
     }
@@ -116,15 +120,12 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
   file {
     "/etc/${masterdir}/${master_proj_name}/templates.cfg":
       content => template('nagios/openstack/templates.cfg.erb');
-    "/etc/${masterdir}/${master_proj_name}/hostgroup.cfg":
-      content => template('nagios/openstack/hostgroups.cfg.erb');
     "/etc/${masterdir}/${htpasswd_file}":
       content => template('nagios/common/etc/nagios3/htpasswd.users.erb');
   }
 
   file { "/etc/${masterdir}/${master_proj_name}":
     recurse => true,
-    alias   => 'conf.d',
     notify  => Service[$masterservice],
     source  => 'puppet:///modules/nagios/common/etc/nagios3/conf.d',
   }
@@ -151,8 +152,16 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
     hasstatus  => true,
     require    => [
       Augeas['configs'],
-      File['conf.d'],
+      File["/etc/${masterdir}/${master_proj_name}"],
       Package[$nagios3pkg]
     ],
+    subscribe => File["/etc/${masterdir}/${master_proj_name}"]
   }
+
+  cron { puppet-agent:
+    command => "puppet agent --onetime --tags=nagios",
+    user    => root,
+    minute  => '*/10'
+  }
+
 }

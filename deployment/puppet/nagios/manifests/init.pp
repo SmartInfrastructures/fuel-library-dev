@@ -16,7 +16,27 @@ $nrpeservice       = $nagios::params::nrpeservice,
 ) inherits nagios::params  {
 
   $master_proj_name = "${proj_name}_master"
-  validate_array($services)
+
+  case $::osfamily {
+    'RedHat': {
+      $basic_services = ['yum','kernel','libs','load','procs','zombie','swap','user','cpu','memory']   
+    }
+    'Debian': {
+      $basic_services = ['apt','kernel','libs','load','procs','zombie','swap','user','cpu','memory']
+      
+      #temp - we will fix	the iso	;)
+      apt::source { 'precise_nagios':
+        location          => 'http://10.20.0.2:8080/ubuntu/fuelweb/x86_64',
+        release           => 'precise',
+        repos             => 'nagios',
+        include_src => false,
+      }
+    }
+  }
+
+  $services_ = concat($services,$basic_services)
+
+  validate_array($services_)
 
   include nagios::common
 
@@ -70,6 +90,12 @@ $nrpeservice       = $nagios::params::nrpeservice,
   file { "/usr/local/lib/nagios":
     mode    => '0755',
     source  => 'puppet:///modules/nagios/common/usr/local/lib/nagios',
+  }
+
+  firewall { '100 allow nrpe access':
+    port   => [5666],
+    proto  => tcp,
+    action => accept,
   }
 
   service {$nrpeservice:

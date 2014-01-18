@@ -4,7 +4,7 @@ class nagios::command inherits nagios::master {
     command => '$USER1$/check_ntp_time -H $HOSTADDRESS$',
   }
 
-  if $::osfamily == 'RedHat' {
+  if $::osfamily == 'RedHat': {
     nagios::command::commands {
       'check_nrpe':
         command => '/usr/lib64/nagios/plugins/check_nrpe -H $HOSTADDRESS$ -c $ARG1$ -a $ARG2$';
@@ -12,7 +12,7 @@ class nagios::command inherits nagios::master {
         command => '/usr/lib64/nagios/plugins/check_nrpe -H $HOSTADDRESS$ -c $ARG1$';
     }
   }
-
+  
   # Remote
 
   nagios::command::commands { 'check_http_api':
@@ -20,15 +20,19 @@ class nagios::command inherits nagios::master {
   }
 
   nagios::command::commands { 'check_galera_mysql':
-    command => "\$USER1$/check_mysql -H \$HOSTADDRESS$ -P ${nagios::master::mysql_port} -u ${nagios::master::mysql_user} -p ${nagios::master::mysql_pass}",
+    command => "$USER1$/check_mysql -H $HOSTADDRESS$ -P ${nagios::master::mysql_port} -u ${nagios::master::mysql_user} -p ${nagios::master::mysql_pass}",
   }
 
   nagios::command::commands { 'check_rabbitmq':
-    command => "\$USER1$/check_os_rabbitmq connect -H \$HOSTADDRESS$ -P ${nagios::master::rabbit_port} -u ${nagios::master::rabbit_user} -p ${nagios::master::rabbit_pass}",
+    command => "$USER1$/check_os_rabbitmq connect -H $HOSTADDRESS$ -P ${nagios::master::rabbit_port} -u ${nagios::master::rabbit_user} -p ${nagios::master::rabbit_pass}",
   }
 
   nagios::command::commands { 'nrpe_check_apt':
     command => '$USER1$/check_nrpe -H $HOSTADDRESS$ -c check_apt',
+  }
+
+  nagios::command::commands { 'nrpe_check_yum':
+    command => '$USER1$/check_nrpe -H $HOSTADDRESS$ -c check_yum',
   }
 
   nagios::command::commands { 'nrpe_check_cert':
@@ -90,4 +94,17 @@ class nagios::command inherits nagios::master {
   nagios::command::commands { 'nrpe_check_users':
     command => '$USER1$/check_nrpe -H $HOSTADDRESS$ -c check_users -a $ARG1$ $ARG2$',
   }
+
+  nagios::command::commands { 'check_icmp':
+    command => '$USER1$/check_icmp -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 2',
+  }
+
+ nagios::command::commands { 'nrpe_check_cpu':
+    command => '$USER1$/check_nrpe -H $HOSTADDRESS$ -c check_cpu -t 30 -a $ARG1$ $ARG2$',
+  }
+
+ nagios::command::commands { 'nrpe_check_mem':
+    command => '$USER1$/check_nrpe -H $HOSTADDRESS$ -c check_mem -a $ARG1$ $ARG2$',
+  }
+
 }

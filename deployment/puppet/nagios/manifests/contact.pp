@@ -8,22 +8,12 @@ class nagios::contact(
     email   => $contacts[email],
     group   => $contacts[group],
     notify  => Exec['fix-permissions'],
-    require => File['conf.d'],
+    require => File["/etc/${masterdir}/${master_proj_name}"],
   }
 
   nagios::contact::contactgroups { $contactgroups[group]:
     alias   => $contactgroups[alias],
     notify  => Exec['fix-permissions'],
-    require => File['conf.d'],
+    require => File["/etc/${masterdir}/${master_proj_name}"],
   }
-
-#  Nagios_contact <||> {
-#    notify  => Exec['fix-permissions'],
-#    require => File['conf.d'],
-#  }
-#
-#  Nagios_contactgroup <||> {
-#    notify  => Exec['fix-permissions'],
-#    require => File['conf.d'],
-#  }
 }
