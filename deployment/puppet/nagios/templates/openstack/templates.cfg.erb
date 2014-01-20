@@ -18,7 +18,7 @@ define host {
   register                        0 check_period                    24x7
   retry_interval                  15
   max_check_attempts              1
-  check_command                   check-host-alive
+  check_command                   check_icmp!40.0,10%!100.0,40%
   notification_interval           300s
   notification_options            d,u,r
   contact_groups                  admins
@@ -39,7 +39,7 @@ define host {
   check_interval                  60
   retry_interval                  15
   max_check_attempts              1
-  check_command                   check-host-alive
+  check_command                   check_icmp!40.0,10%!100.0,40%
   notification_interval           300s
   notification_options            d,u,r
   contact_groups                  admins

@@ -5,6 +5,6 @@ define nagios::command::commands( $command = false ) {
     command_line => $command,
     target       => "/etc/${nagios::params::masterdir}/${nagios::master::master_proj_name}/commands.cfg",
     notify       => Exec['fix-permissions'],
-    require      => File['conf.d'],
+    require => File["/etc/${nagios::params::masterdir}/${nagios::master::master_proj_name}"],
   }
 }

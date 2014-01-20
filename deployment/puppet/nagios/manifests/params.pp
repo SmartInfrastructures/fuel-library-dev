@@ -4,6 +4,10 @@ class nagios::params {
     'nova-compute' => 'check_nrpe_1arg!check_nova_compute',
     'nova-network' => 'check_nrpe_1arg!check_nova_network',
     'libvirt' => 'check_nrpe_1arg!check_libvirt',
+    'quantum-api' => 'check_http_api!9696',
+    'quantum' => 'check_nrpe_1arg!check_quantum',
+    'ovswitch' => 'check_nrpe_1arg!check_ovswitch',
+    'ovswitch_server' => 'check_nrpe_1arg!check_ovswitch_server',
     'swift-proxy' => 'check_nrpe_1arg!check_swift_proxy',
     'swift-account' => 'check_nrpe_1arg!check_swift_account',
     'swift-container' => 'check_nrpe_1arg!check_swift_container',
@@ -26,6 +30,7 @@ class nagios::params {
     'rabbitmq' => 'check_rabbitmq',
     'mysql' => 'check_galera_mysql',
     'apt' => 'nrpe_check_apt',
+    'yum' => 'nrpe_check_yum',
     'kernel' => 'nrpe_check_kernel',
     'libs' => 'nrpe_check_libs',
     'load' => 'nrpe_check_load!5.0!4.0!3.0!10.0!6.0!4.0',
@@ -33,16 +38,19 @@ class nagios::params {
     'zombie' => 'nrpe_check_procs_zombie!5!10',
     'swap' => 'nrpe_check_swap!20%!10%',
     'user' => 'nrpe_check_users!5!10',
-    'host-alive' => 'check-host-alive',
+    'cpu' => 'nrpe_check_cpu!80!90',
+    'memory' => 'nrpe_check_mem!80!90',
+#    'host-alive' => 'check-host-alive',
   }
 
   case $::osfamily {
     'RedHat': {
       $nagios3pkg = [
-        'nagios', 'nagios-plugins-nrpe',
+        'nagios',
+# 'nagios-plugins-nrpe',
          ]
       $nrpepkg = [
-        'binutils',
+        'binutils','yum-plugin-security',
         'openssl',
         'nrpe',
         'nagios-plugins-nrpe',
@@ -53,7 +61,7 @@ class nagios::params {
         'nagios-plugins-ircd', 'nagios-plugins-mysql',
         'nagios-plugins-nt', 'nagios-plugins-ntp', 'nagios-plugins-ntp-perl',
         'nagios-plugins-nwstat', 'nagios-plugins-overcr', 'nagios-plugins-ping',
-        'nagios-plugins-procs', 'nagios-plugins-real',
+        'nagios-plugins-procs', 'nagios-plugins-real', 'nagios-plugins-load',
         'nagios-plugins-rpc', 'nagios-plugins-sensors', 'nagios-plugins-ssh',
         'nagios-plugins-swap', 'nagios-plugins-tcp', 'nagios-plugins-time',
         'nagios-plugins-users',  ]
@@ -77,7 +85,8 @@ class nagios::params {
     'Debian': {
       $nagios3pkg = [
         'nagios3',
-        'nagios-nrpe-plugin' ]
+        'nagios-nrpe-plugin'
+ ]
       $nrpepkg = [
         'binutils',
         'libnagios-plugin-perl',

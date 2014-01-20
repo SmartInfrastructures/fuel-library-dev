@@ -1,22 +1,19 @@
 class nagios::host inherits nagios::master {
 
-  #nagios::host::hostgroups { $hostgroups['hostgroup_name']:
-  #  proj_name => $proj_name,
-  #  members   => $hostgroups[members],
-  #}
+  $deployment_id = $::fuel_settings['deployment_id']
+ 
+  $tag = "deployment_${deployment_id}"
+  
+  notify{ "**** importing host with tag ${tag} *****": }
 
-  Nagios_host <<||>> {
+  Nagios_host <<|tag==$tag|>> {
     notify  => Exec['fix-permissions'],
-    require => File['conf.d'],
+    require => File["/etc/${masterdir}/${master_proj_name}"],
   }
 
-  #Nagios_hostgroup <<||>> {
-  #  notify  => Exec['fix-permissions'],
-  #  require => File['conf.d'],
-  #}
-
-  Nagios_hostextinfo <<||>> {
+  Nagios_hostgroup <<|tag==$tag|>> {
     notify  => Exec['fix-permissions'],
-    require => File['conf.d'],
+    require => File["/etc/${masterdir}/${master_proj_name}"],
   }
+
 }

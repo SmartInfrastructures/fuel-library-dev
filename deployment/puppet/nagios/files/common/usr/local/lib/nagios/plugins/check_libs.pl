@@ -28,7 +28,7 @@ use Getopt::Long;
 $ENV{'PATH'} = '/bin:/sbin:/usr/bin:/usr/sbin';
 delete @ENV{'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
 
-my $LSOF = '/usr/bin/lsof';
+my $LSOF = '/usr/sbin/lsof';
 my $VERSION = '0.0.0';
 
 # nagios exit codes
