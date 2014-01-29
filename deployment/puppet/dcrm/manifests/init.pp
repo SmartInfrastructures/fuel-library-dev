@@ -123,5 +123,5 @@
                 command => "rsync -rlpt --exclude=*~ /tmp/nova/novaclient/ /usr/lib/python2.7/dist-packages/novaclient/",
                 path => "/usr/bin:/usr/sbin:/bin:/sbin",
                 onlyif => "test -d /usr/lib/python2.7/dist-packages/novaclient"
-            }->
+            }
     }         

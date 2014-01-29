@@ -176,6 +176,7 @@ class nailgun(
   }
 
   class { "nailgun::puppetdb": }
+  class { "nailgun::augeas": }
 
   class { "nailgun::mcollective":
     mco_pskey => $mco_pskey,
