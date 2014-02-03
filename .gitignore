@@ -24,3 +24,4 @@ Vagrantfile
 metadata.json
 Gemfile.lock
 /rdoc
+*.komodoproject
