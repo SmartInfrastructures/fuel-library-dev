@@ -304,11 +304,16 @@ class osnailyfacter::cluster_simple {
       }
 
       #ADDONS END
-       if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.pivot_scheduler.PivotScheduler' ) {
+      if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.pivot_scheduler.PivotScheduler' ) {
         include dcrm
-        #include dcrm::controller
-      } 
-      #FIXME add Pulsar
+        include dcrm::controller
+      }
+      
+      if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.filter_scheduler.FilterScheduler.Pulsar' ) {
+        include dcrm
+        include dcrm::controller_pulsar
+      }
+      
     }
 
     "compute" : {
@@ -371,8 +376,11 @@ class osnailyfacter::cluster_simple {
         include dcrm
         #include dcrm::compute
       }  
+      if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.filter_scheduler.FilterScheduler.Pulsar' ) {
+        include dcrm
+        include dcrm::compute_pulsar
+      }
       #ADDONS XIFI END
-      #FIXME add Pulsar
 
     } # COMPUTE ENDS
 
