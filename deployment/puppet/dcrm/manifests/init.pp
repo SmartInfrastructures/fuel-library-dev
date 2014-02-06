@@ -124,4 +124,10 @@
                 path => "/usr/bin:/usr/sbin:/bin:/sbin",
                 onlyif => "test -d /usr/lib/python2.7/dist-packages/novaclient"
             }
+    
+#       service     { 'nova-api':
+#                    ensure => running,
+#                    enable => true,
+#                    subscribe => File['/etc/nova/nova.conf'],    
+#                }	            
     }         

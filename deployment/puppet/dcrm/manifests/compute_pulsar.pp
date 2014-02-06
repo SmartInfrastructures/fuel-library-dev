@@ -49,13 +49,6 @@ class dcrm::compute_pulsar {
 			line => "scheduler_pulsar_enabled=True",
 			path => '/etc/nova/nova.conf'
 		}		
-    
-    service     { 'nova-api':
-                    ensure => running,
-                    enable => true,
-                    subscribe => File['/etc/nova/nova.conf'],    
-                }	
-
 }
 
     

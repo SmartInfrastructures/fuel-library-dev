@@ -19,10 +19,4 @@ class dcrm::compute {
                     line => "scheduler_ongoing_enabled=TRUE",
                     path => '/etc/nova/nova.conf'
                 }
-      
-    service     { 'nova-api':
-                    ensure => running,
-                    enable => true,
-                    subscribe => File['/etc/nova/nova.conf'],    
-                }
 }
