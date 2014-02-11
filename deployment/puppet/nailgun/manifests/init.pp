@@ -58,7 +58,7 @@ class nailgun(
   Class["nailgun::nginx-nailgun"] ->
   Class["nailgun::cobbler"] ->
   Class["nailgun::pm"] ->
-  Class["nailgun::puppetdb"]->
+  #Class["nailgun::puppetdb"]->
   Class["openstack::logging"] ->
   Class["nailgun::supervisor"] ->
   Anchor<| title == "nailgun-end" |>
@@ -175,7 +175,8 @@ class nailgun(
     puppet_master_hostname => $puppet_master_hostname,
   }
 
-  class { "nailgun::puppetdb": }
+  #class { "nailgun::puppetdb": }
+  	
   class { "augeas": }
 
   class { "nailgun::mcollective":
@@ -244,5 +245,6 @@ class nailgun(
     group => root,
     mode => 0600,
   }
-
+  include puppetdb
+  include puppetdb::master::config
 }
