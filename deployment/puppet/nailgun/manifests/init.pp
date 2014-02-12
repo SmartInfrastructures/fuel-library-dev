@@ -246,5 +246,5 @@ class nailgun(
     mode => 0600,
   }
   include puppetdb
-  include puppetdb::master::config
+  #include puppetdb::master::config
 }
