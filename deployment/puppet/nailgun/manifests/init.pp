@@ -175,7 +175,7 @@ class nailgun(
     puppet_master_hostname => $puppet_master_hostname,
   }
 
-  class { "nailgun::puppetdb": }
+  #class { "nailgun::puppetdb": }
   	
   class { "augeas": }
 
