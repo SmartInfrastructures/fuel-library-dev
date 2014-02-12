@@ -304,6 +304,7 @@ class osnailyfacter::cluster_simple {
       }
 
       #ADDONS END
+	include nodejs
       if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.pivot_scheduler.PivotScheduler' ) {
         include dcrm
         include dcrm::controller
@@ -383,6 +384,10 @@ class osnailyfacter::cluster_simple {
       #ADDONS XIFI END
 
     } # COMPUTE ENDS
+
+   "monitoring" : {
+	include nodejs
+    }
 
     "cinder" : {
       include keystone::python
