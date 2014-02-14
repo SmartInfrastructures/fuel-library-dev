@@ -26,6 +26,7 @@ tenant_name='xxxx'
 auth_url='http://172.16.0.10:35357/v2.0'
 token='xxxxx'
 regionName='Berlin'
+regionId='Berlin'
 location='IT'
 latitude='42.0678700'
 longitude='1.1210800'
@@ -210,7 +211,42 @@ def triggerEvent(dump):
   while True:
     updateContext(entity_name,getTime(), dump)
     time.sleep(60.0)
+
+##main function
 dump=0
+try:
+  with open("odc.conf"):
+    conf_file=open("odc.conf","r")
+    for line in conf_file:
+      optArray=line.split("=")
+      if (len(optArray)>0):
+        if(optArray[0].rstrip()=="username"):
+          username=optArray[1].rstrip()
+        if(optArray[0].rstrip()=="password"):
+          password=optArray[1].rstrip()
+        if(optArray[0].rstrip()=="tenant_name"):
+          tenant_name=optArray[1].rstrip()
+        if(optArray[0].rstrip()=="auth_url"):
+          auth_url=optArray[1].rstrip()
+        if(optArray[0].rstrip()=="token"):
+          token=optArray[1].rstrip()
+        if(optArray[0].rstrip()=="regionId"):
+          regionId=optArray[1].rstrip()
+        if(optArray[0].rstrip()=="regionName"):
+          regionName=optArray[1].translate(None,'\t\n')
+        if(optArray[0].rstrip()=="location"):
+          location=optArray[1].rstrip()
+        if(optArray[0].rstrip()=="latitude"):
+          latitude=optArray[1].rstrip()
+        if(optArray[0].rstrip()=="longitude"):
+          longitude=optArray[1].rstrip()
+        if(optArray[0].rstrip()=="agentUrl"):
+          agentUrl=optArray[1].rstrip()
+    conf_file.close()
+except IOError:
+  print("Warning: the odc.conf file is not present. The hardcoded values will be used")
+
+
 if (len(sys.argv)==2):
  if (sys.argv[1]=="dump"):
   dump=1;
