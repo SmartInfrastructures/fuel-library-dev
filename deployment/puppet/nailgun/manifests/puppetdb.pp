@@ -24,16 +24,9 @@ class nailgun::puppetdb(
   firewall { '100 allow pupptedb access':
     port   => [$listen_port,8081],
     proto  => tcp,
-    action => accept,
+    action => accept
   }
   
-  Package['puppetdb'] ->
-  Class['puppetdb::server::firewall'] ->
-  Class['puppetdb::server::database_ini'] ->
-  Class['puppetdb::server::jetty_ini'] ->
-  Exec['puppetdb-ssl-setup'] ->
-  Service['puppetdb']
-
   Class['puppetdb::master::routes']->
   Class['puppetdb::master::storeconfigs']->
   Class['puppetdb::server']~> Service[$puppet_service_name]
