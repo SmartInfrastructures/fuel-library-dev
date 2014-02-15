@@ -4,7 +4,7 @@ class nagios::command inherits nagios::master {
     command => '$USER1$/check_ntp_time -H $HOSTADDRESS$',
   }
 
-  if $::osfamily == 'RedHat': {
+  if $::osfamily == 'RedHat' {
     nagios::command::commands {
       'check_nrpe':
         command => '/usr/lib64/nagios/plugins/check_nrpe -H $HOSTADDRESS$ -c $ARG1$ -a $ARG2$';

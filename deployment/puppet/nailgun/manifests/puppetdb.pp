@@ -29,6 +29,6 @@ class nailgun::puppetdb(
   }
   
   Firewall['100 allow pupptedb access']->
+  Class['puppetdb::master::storeconfigs']->
   Class['puppetdb::server']
-  #~> Service[$puppet_service_name]
 }
