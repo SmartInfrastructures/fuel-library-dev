@@ -58,9 +58,9 @@ class nailgun(
   Class["nailgun::nginx-nailgun"] ->
   Class["nailgun::cobbler"] ->
   Class["nailgun::pm"] ->
+  Class["nailgun::puppetdb"] ->
   Class["openstack::logging"] ->
   Class["nailgun::supervisor"] ->
-  Class["nailgun::puppetdb"]->
   Anchor<| title == "nailgun-end" |>
 
   class { "nailgun::packages":
@@ -82,6 +82,7 @@ class nailgun(
                Class["nailgun::nginx-repo"],
                Class["nailgun::nginx-nailgun"],
                Class["nailgun::pm"],
+               Class["nailgun::puppetdb"]
                ],
   }
 
@@ -205,7 +206,8 @@ class nailgun(
     require              => Class['rabbitmq::server'],
   }
 
-  class { "nailgun::nginx-service": }
+  class { "nailgun::nginx-service": } ->
+  class { "nailgun::puppetdb": }
 
   class { "nailgun::logrotate": }
 
@@ -228,7 +230,7 @@ class nailgun(
     command => "cp /root/.ssh/id_rsa.pub /etc/cobbler/authorized_keys",
     creates => "/etc/cobbler/authorized_keys",
     require => Class["nailgun::cobbler"],
-  } ->  class { "nailgun::puppetdb": }
+  }
 
   file { "/etc/ssh/sshd_config":
     content => template("nailgun/sshd_config.erb"),

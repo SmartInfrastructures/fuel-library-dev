@@ -22,12 +22,13 @@ class nailgun::puppetdb(
   }
   
   firewall { '100 allow pupptedb access':
-    port   => [$listen_port,8081],
+    port   => [8081],
     proto  => tcp,
+    state => ['NEW', 'ESTABLISHED'],
     action => accept
   }
   
-  Class['puppetdb::master::routes']->
-  Class['puppetdb::master::storeconfigs']->
-  Class['puppetdb::server']~> Service[$puppet_service_name]
+  Firewall['100 allow pupptedb access']->
+  Class['puppetdb::server']
+  #~> Service[$puppet_service_name]
 }
