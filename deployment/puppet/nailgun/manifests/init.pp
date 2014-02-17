@@ -58,7 +58,7 @@ class nailgun(
   Class["nailgun::nginx-nailgun"] ->
   Class["nailgun::cobbler"] ->
   Class["nailgun::pm"] ->
-  Class["nailgun::puppetdb"]->
+  Class["nailgun::puppetdb"] ->
   Class["openstack::logging"] ->
   Class["nailgun::supervisor"] ->
   Anchor<| title == "nailgun-end" |>
@@ -82,6 +82,7 @@ class nailgun(
                Class["nailgun::nginx-repo"],
                Class["nailgun::nginx-nailgun"],
                Class["nailgun::pm"],
+               Class["nailgun::puppetdb"]
                ],
   }
 
@@ -175,8 +176,6 @@ class nailgun(
     puppet_master_hostname => $puppet_master_hostname,
   }
 
-  class { "nailgun::puppetdb": }
-  	
   class { "augeas": }
 
   class { "nailgun::mcollective":
@@ -207,7 +206,8 @@ class nailgun(
     require              => Class['rabbitmq::server'],
   }
 
-  class { "nailgun::nginx-service": }
+  class { "nailgun::nginx-service": } ->
+  class { "nailgun::puppetdb": }
 
   class { "nailgun::logrotate": }
 

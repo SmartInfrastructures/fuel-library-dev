@@ -13,6 +13,13 @@ class osnailyfacter::cluster_simple {
     }
   }
 
+  #XIFI ADD ON
+  if !$::fuel_settings['monitoring'] {
+    $monitoring_hash = {}
+  } else {
+    $monitoring_hash = $::fuel_settings['monitoring']
+  } 
+
   if $fuel_settings['cinder_nodes'] {
      $cinder_nodes_array   = $::fuel_settings['cinder_nodes']
   } else {
@@ -304,7 +311,9 @@ class osnailyfacter::cluster_simple {
       }
 
       #ADDONS END
-	include nodejs
+
+      #ADDONS XIFI START
+      #	include nodejs
       if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.pivot_scheduler.PivotScheduler' ) {
         include dcrm
         include dcrm::controller
@@ -315,6 +324,28 @@ class osnailyfacter::cluster_simple {
         include dcrm::controller_pulsar
       }
       
+      #should be use_nagios
+      if $monitoring_hash['region_id']{
+
+        # for completeness we should include "rabbit" and "mysql" but there are some issues with the nrpe to be explored
+        $basic_services = ['keystone', 'nova-scheduler', 'cinder-scheduler','memcached','nova-api','cinder-api','glance-api','glance-registry','horizon']
+
+        $network_services = $::use_quantum ? {
+          true  => ['quantum-api'],
+          false => [],
+          default => []
+        }
+ 
+      	$controller_services = concat($basic_services,$network_services)
+
+        class {'nagios':
+               proj_name	=> 'xifi-monitoring',
+               services		=> $controller_services,
+               whitelist	=> ['127.0.0.1', $controller_node_address, $controller_node_public],
+               hostgroup	=> 'controller-nodes'
+        }
+      }
+      #ADDONS XIFI END
     }
 
     "compute" : {
@@ -372,7 +403,7 @@ class osnailyfacter::cluster_simple {
       if ($::use_ceph){
         Class['openstack::compute'] -> Class['ceph']
       }
- #ADDONS XIFI START
+      #ADDONS XIFI START
       if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.pivot_scheduler.PivotScheduler' ) {
         include dcrm
         #include dcrm::compute
@@ -381,14 +412,61 @@ class osnailyfacter::cluster_simple {
         include dcrm
         include dcrm::compute_pulsar
       }
+
+      if $monitoring_hash['region_id']{
+
+        $basic_services = ['nova-compute','libvirt']
+        
+	$network_services = $::use_quantum ? {
+	  true  => ['quantum','ovswitch','ovswitch_server'],
+          false => ['nova-network'],
+          default => ['nova-network']
+	}
+ 
+        $compute_services = concat($basic_services,$network_services)
+
+        class {'nagios':
+               proj_name        => 'xifi-monitoring',
+               services         => $compute_services,
+               whitelist        => ['127.0.0.1', $controller_node_address, $controller_node_public],
+               hostgroup        => 'compute-nodes'
+        }
+      }
+
       #ADDONS XIFI END
 
     } # COMPUTE ENDS
-
+   
+   #ADDONS XIFI START
+   
    "monitoring" : {
-	include nodejs
-    }
+      
+      #include nodejs
 
+      #should be use_nagios
+      if $monitoring_hash['region_id']{
+        # for completeness we should include "rabbit" and "mysql" but there are some issues with the nrpe to be explored
+
+	class {'nagios::master':
+		proj_name       => 'xifi-monitoring',
+		rabbitmq        => true,
+		nginx           => false,
+		mysql_user      => 'root',
+		mysql_pass      => $mysql_hash[root_password],
+		mysql_port      => '3307',
+		rabbit_pass	=> $rabbit_hash['password'],
+		rabbit_user     => $rabbit_hash['user'],
+		rabbit_port     => '5673',
+		templatehost    => {'name' => 'default-host', 'check_interval' => $monitoring_hash['nagios_host_check_interval']},
+		templateservice => {'name' => 'default-service', 'check_interval'=> $monitoring_hash['nagios_service_check_interval']},
+		contactgroups   => {'group' => 'admins', 'alias' => 'Admins'},
+		contacts        => {'email' => $monitoring_hash['nagios_mail_alert']}
+	}        
+      }
+    } # MONITORING ENDS
+    
+    #ADDONS XIFI END
+    
     "cinder" : {
       include keystone::python
       package { 'python-amqp':
@@ -423,6 +501,19 @@ class osnailyfacter::cluster_simple {
         verbose              => $verbose ? { 'true' => true, true => true, default => false },
         use_syslog           => $::fuel_settings['use_syslog'] ? { 'false'=>false, false=>false, default=>true },
       }
+
+
+      #ADDONS XIFI START
+      if $monitoring_hash['region_id']{
+        class {'nagios':
+               proj_name        => 'xifi-monitoring',
+               services         => ['cinder-volume'],
+               whitelist        => ['127.0.0.1', $controller_node_address, $controller_node_public],
+               hostgroup        => 'volume-nodes'
+        }
+      }
+      #ADDONS XIFI END
+     
     } #CINDER ENDS
 
     "ceph-osd" : {

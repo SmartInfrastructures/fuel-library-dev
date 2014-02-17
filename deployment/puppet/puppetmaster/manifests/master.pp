@@ -61,6 +61,7 @@ class puppetmaster::master (
                 Package["rubygem-mongrel"],
                 Package["puppetdb-terminus"],
                 ],
+    subscribe => File['/etc/puppet/puppet.conf']
   }
 
 
