@@ -1,11 +1,16 @@
 class dcrm::controller_pulsar {
 
-    exec	{ "update_novadb":
-     			command => "python /usr/lib/python2.7/dist-packages/nova/db/sqlalchemy/migrate_repo/manage.py upgrade ${sql_connection}",
-    			path => "/usr/bin:/usr/sbin:/bin:/sbin",
-    			onlyif => "test -f /usr/lib/python2.7/dist-packages/nova/db/sqlalchemy/migrate_repo/versions/162_Add_instance_stats_table.pyc"
-    	        }
-
+    file {  "script_copy_pulsar":
+              source => "puppet:///modules/dcrm/manage.sh",
+              path => "/tmp/manage.sh",
+              recurse => true,
+              mode => 0755
+            }->
+    exec {  "update-java-alternatives":
+              path => "/usr/bin:/usr/sbin:/bin:/sbin",
+              command => "sh /tmp/manage.sh ${sql_connection}", 
+              onlyif => "test -f /tmp/manage.sh"
+            }
     augeas 	{ 'pulsar_scheduler':
 			context =>  "/files/etc/nova/nova.conf/.nova/",
 		        changes =>  "set scheduler_driver nova.scheduler.filter_scheduler.FilterScheduler.Pulsar"
