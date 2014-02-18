@@ -6,7 +6,7 @@ class dcrm::controller {
              	      recurse => true,
               	      mode => 0755
             	}->
-    exec        { "update-db":
+    exec        { "update-db-pivot":
         	      path => "/usr/bin:/usr/sbin:/bin:/sbin",
         	      command => "sh /tmp/manage.sh ${sql_connection}", 
 	              onlyif => "test -f /tmp/manage.sh"
