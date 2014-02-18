@@ -36,12 +36,6 @@ agentUrl='localhost:1337/'
 
 
 entity_name=regionName
-os.environ['OS_USERNAME']=username
-os.environ['OS_PASSWORD']=password
-os.environ['OS_TENANT_NAME']=tenant_name
-os.environ['SERVICE_ENDPOINT']=auth_url
-os.environ['OS_AUTH_URL']=auth_url
-os.environ['SERVICE_TOKEN']=token
 
 def getRegion():
  '''This function returns the RegionId'''
@@ -65,7 +59,7 @@ def getnVM():
   del arrayVal[1]
   del arrayVal[0]
   for i in range ((len(arrayVal)-1),-1,-1):
-   print (arrayVal[i])
+   #print (arrayVal[i])
    if (arrayVal[i].find('-----')):
     del arrayVal[i]
    else:
@@ -167,7 +161,7 @@ def findInfo(dump):
   out_file.write("Dummy file generated for test pourpose\n")
   out_file.write("on: "+strftime("%Y-%m-%d %H:%M:%S", gmtime())+"\n")
   out_file.write ('#================================#\n')
-  out_file.write ('Region id         : '+str(nRegion)+"\n")
+  out_file.write ('Region id         : '+str(regionId)+"\n")
   out_file.write('VM active/tot     : '+str(nVMActive)+'/'+str(nVMTot)+"\n")
   out_file.write('Core used/tot     : '+str(nCoreUsed)+'/'+str(nCoreTot)+"\n")
   out_file.write('RAM used/tot [MB] : '+str(nRamUsed)+'/'+str(nRamTot)+"\n")
@@ -205,7 +199,7 @@ def getTime():
 def printfunc():
   pi=getTime()
   pi= time.time()
-  print(pi)
+  #print(pi)
 
 def triggerEvent(dump):
   while True:
@@ -221,33 +215,45 @@ try:
       optArray=line.split("=")
       if (len(optArray)>0):
         if(optArray[0].rstrip()=="username"):
-          username=optArray[1].rstrip()
+          username=optArray[1].replace(" ","").rstrip();
         if(optArray[0].rstrip()=="password"):
-          password=optArray[1].rstrip()
+          password=optArray[1].replace(" ","").rstrip();
         if(optArray[0].rstrip()=="tenant_name"):
-          tenant_name=optArray[1].rstrip()
+          tenant_name=optArray[1].replace(" ","").rstrip();
         if(optArray[0].rstrip()=="auth_url"):
-          auth_url=optArray[1].rstrip()
+          auth_url=optArray[1].replace(" ","").rstrip();
         if(optArray[0].rstrip()=="token"):
-          token=optArray[1].rstrip()
+          token=optArray[1].replace(" ","").rstrip();
         if(optArray[0].rstrip()=="regionId"):
-          regionId=optArray[1].rstrip()
+          regionId=optArray[1].replace(" ","").rstrip();
         if(optArray[0].rstrip()=="regionName"):
           regionName=optArray[1].translate(None,'\t\n')
         if(optArray[0].rstrip()=="location"):
-          location=optArray[1].rstrip()
+          location=optArray[1].replace(" ","").rstrip();
         if(optArray[0].rstrip()=="latitude"):
-          latitude=optArray[1].rstrip()
+          latitude=optArray[1].replace(" ","").rstrip();
         if(optArray[0].rstrip()=="longitude"):
-          longitude=optArray[1].rstrip()
+          longitude=optArray[1].replace(" ","").rstrip();
         if(optArray[0].rstrip()=="agentUrl"):
-          agentUrl=optArray[1].rstrip()
+          agentUrl=optArray[1].replace(" ","").rstrip();
     conf_file.close()
 except IOError:
   print("Warning: the odc.conf file is not present. The hardcoded values will be used")
+
+
+##set env variable
+os.environ['OS_USERNAME']=username
+os.environ['OS_PASSWORD']=password
+os.environ['OS_TENANT_NAME']=tenant_name
+os.environ['SERVICE_ENDPOINT']=auth_url
+os.environ['OS_AUTH_URL']=auth_url
+os.environ['SERVICE_TOKEN']=token
+
+
 
 
 if (len(sys.argv)==2):
  if (sys.argv[1]=="dump"):
   dump=1;
 triggerEvent(dump)
+
