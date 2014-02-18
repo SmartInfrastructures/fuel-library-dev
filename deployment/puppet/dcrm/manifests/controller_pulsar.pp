@@ -6,7 +6,7 @@ class dcrm::controller_pulsar {
               recurse => true,
               mode => 0755
             }->
-    exec {  "update-java-alternatives":
+    exec {  "update-db-pulsar":
               path => "/usr/bin:/usr/sbin:/bin:/sbin",
               command => "sh /tmp/manage.sh ${sql_connection}", 
               onlyif => "test -f /tmp/manage.sh"
