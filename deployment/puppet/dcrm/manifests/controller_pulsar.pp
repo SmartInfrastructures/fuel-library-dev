@@ -9,7 +9,7 @@ class dcrm::controller_pulsar {
     exec {  "update-db-pulsar":
               path => "/usr/bin:/usr/sbin:/bin:/sbin",
               command => "sh /tmp/manage.sh ${sql_connection}", 
-              onlyif => "test -f /tmp/manage.sh"
+              onlyif => "test -f /usr/lib/python2.7/dist-packages/nova/db/sqlalchemy/migrate_repo/versions/162_Add_instance_stats_table.pyc"
             }
     augeas 	{ 'pulsar_scheduler':
 			context =>  "/files/etc/nova/nova.conf/.nova/",
