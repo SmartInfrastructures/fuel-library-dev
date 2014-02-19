@@ -313,7 +313,7 @@ class osnailyfacter::cluster_simple {
       #ADDONS END
 
       #ADDONS XIFI START
-      #	include nodejs
+      include nodejs
       if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.pivot_scheduler.PivotScheduler' ) {
         include dcrm
         include dcrm::controller
@@ -406,7 +406,7 @@ class osnailyfacter::cluster_simple {
       #ADDONS XIFI START
       if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.pivot_scheduler.PivotScheduler' ) {
         include dcrm
-        #include dcrm::compute
+        include dcrm::compute
       }  
       if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.filter_scheduler.FilterScheduler.Pulsar' ) {
         include dcrm
