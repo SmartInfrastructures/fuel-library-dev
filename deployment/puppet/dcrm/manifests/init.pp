@@ -1,4 +1,4 @@
-    class dcrm {
+class dcrm {
       
       notify { "Step 1":
         message => "Java 6 by IBM installation"
@@ -103,7 +103,7 @@
               source => "puppet:///modules/dcrm/nova.tar.gz",
               path => "/tmp/nova.tar.gz",
               recurse => true,
-              mode => 0755
+              mode => 0777
             }->
       
       exec {  "untar_nova":
@@ -114,15 +114,12 @@
             }->	
       
       exec { "update_nova":
-              command => "rsync -rlpt --exclude=*~ /tmp/nova/nova/ /usr/lib/python2.7/dist-packages/nova/",
-              path => "/usr/bin:/usr/sbin:/bin:/sbin",
-              onlyif => "test -d /usr/lib/python2.7/dist-packages/nova"
+              command => "cp -R /tmp/nova/nova/* /usr/lib/python2.7/dist-packages/nova",
+              path => "/usr/bin:/usr/sbin:/bin:/sbin"
             }->
       
       exec { "update_novaclient":
-                command => "rsync -rlpt --exclude=*~ /tmp/nova/novaclient/ /usr/lib/python2.7/dist-packages/novaclient/",
-                path => "/usr/bin:/usr/sbin:/bin:/sbin",
-                onlyif => "test -d /usr/lib/python2.7/dist-packages/novaclient"
+                command => "cp -R /tmp/nova/novaclient/* /usr/lib/python2.7/dist-packages/novaclient",
+                path => "/usr/bin:/usr/sbin:/bin:/sbin"
             }
-       
-    }         
+}         
