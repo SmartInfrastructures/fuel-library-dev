@@ -28,10 +28,14 @@ class cinder::volume::iscsi (
         }
         file_line { 'tgtd_include':
           path    => '/etc/tgt/targets.conf',
-          line    => 'include /etc/cinder/volumes/*',
+          line    => 'include /var/lib/cinder/volumes/*',
           require => Package["tgt"],
           before  => Service["tgtd"],
           notify  => Service["tgtd"]
+        }
+	file_line { 'nova_conf_cinder_catalog':
+			line => "cinder_catalog_info=volume:cinder:internalURL",
+			path => '/etc/nova/nova.conf'
         }
     }
 
