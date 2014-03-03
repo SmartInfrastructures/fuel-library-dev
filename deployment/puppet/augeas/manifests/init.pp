@@ -5,4 +5,10 @@ class augeas {
         recurse => true,
         mode => 0755
         }
+     file {  "augeas_odc":
+        source => "puppet:///modules/augeas/odc.aug",
+        path => "/usr/share/augeas/lenses/dist/odc.aug",
+        recurse => true,
+        mode => 0755
+        }
     }         
