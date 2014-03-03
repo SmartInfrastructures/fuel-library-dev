@@ -329,21 +329,22 @@ class osnailyfacter::cluster_simple {
 
       # OpenStack Data Collector      
 
-      if $monitoring_hash['use_openstack_data_collector'] {
-         Class['odc'] { 
-                        username => 'nova',
-                        password => $nova_hash[user_password],
-                        tenant_name = 'services',
-                        auth_url = '127.0.0.1:35357/v2.0',
-                        token    => $keystone_hash[admin_token],
-                        region_name  =>  $federation_hash[region_name],
-                        region_id =>   $federation_hash[region_id],
-                        location => $federation_hash[country],
-                        latitude =>  $federation_hash[latitude],  
-                        longitude =>  $federation_hash[longitude],
-                        agent_url =>  $monitoring_hash[monitoring_node_url]  
-         }
-      }
+	if $monitoring_hash['use_openstack_data_collector'] {
+	        class {'odc':
+	                username        =>      'nova',
+	                password        =>      $nova_hash[user_password],
+	                tenant_name     =>      'services',
+	                auth_url        =>      '127.0.0.1:35357/v2.0',
+	                token           =>      $keystone_hash[admin_token],
+	                region_name     =>      $federation_hash[region_name],
+	                region_id       =>      $federation_hash[region_id],
+	                location        =>      $federation_hash[country],
+	                latitude        =>      $federation_hash[latitude],
+	                longitude       =>      $federation_hash[longitude],
+	                agent_url       =>      $monitoring_hash[monitoring_node_url],
+	         }
+	}
+
 
       if $monitoring_hash['use_nagios'] {
 
