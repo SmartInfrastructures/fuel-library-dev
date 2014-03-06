@@ -315,8 +315,6 @@ class osnailyfacter::cluster_simple {
 
       #ADDONS XIFI START
 
-      include nodejs
-
       if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.pivot_scheduler.PivotScheduler' ) {
         include dcrm
         include dcrm::controller
