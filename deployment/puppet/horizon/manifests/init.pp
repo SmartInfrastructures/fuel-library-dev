@@ -233,8 +233,7 @@ class horizon(
 	    command     => "su $wsgi_user -s '/bin/bash' -c 'cd /usr/share/openstack-dashboard && python manage.py compress --force'",
 	    refreshonly => true,
 	    subscribe   => [File['/usr/share/openstack-dashboard/']],
-	    require     => [Package['dashboard']],
-	    notify      => Class['nodejs'],	
+	    require     => [Package['dashboard']]
  }
 
   if $cache_server_ip =~ /^127\.0\.0\.1/ {
