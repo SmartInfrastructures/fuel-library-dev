@@ -225,20 +225,17 @@ class horizon(
     subscribe => File[$::horizon::params::local_settings_path,
                       $::horizon::params::logdir],
   }
-   package { "python-lesscpy":
+   package { "lessc":
     ensure => "installed"
   }->
-  Package['dashboard'] -> Exec['horizon_compress_styles']
-      Package['dashboard'] ~> Exec['horizon_compress_styles']
-      Package[$::horizon::params::horizon_additional_packages] -> Exec['horizon_compress_styles']
-      exec { 'horizon_compress_styles':
-        path => '/bin:/usr/bin:/sbin:/usr/sbin',
-        cwd => '/usr/share/openstack-dashboard',
-        command => 'python manage.py compress',
-        refreshonly => true
-      }
-      Exec['horizon_compress_styles'] ~> Service['httpd']
-    }
+   exec {"refresh horizon static":
+	    path        => ['/bin','/sbin','/usr/sbin','/usr/bin'],
+	    command     => "su $wsgi_user -s '/bin/bash' -c 'cd /usr/share/openstack-dashboard && python manage.py compress --force'",
+	    refreshonly => true,
+	    subscribe   => [File['/usr/share/openstack-dashboard/']],
+	    require     => [Package['dashboard']],
+	    notify      => Class['nodejs'],	
+ }
 
   if $cache_server_ip =~ /^127\.0\.0\.1/ {
     Class['memcached'] -> Class['horizon']
