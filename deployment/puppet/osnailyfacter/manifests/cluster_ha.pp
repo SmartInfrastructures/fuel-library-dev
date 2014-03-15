@@ -280,7 +280,28 @@ class osnailyfacter::cluster_ha {
       use_unicast_corosync          => $::fuel_settings['use_unicast_corosync'],
       nameservers                   => $::dns_nameservers,
     }
+  if $::fuel_settings['role'] == 'primary-controller' {
+     if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.pivot_scheduler.PivotScheduler' ) {
+        include dcrm
+        include dcrm::controller
+      }
+      
+      if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.filter_scheduler.FilterScheduler.Pulsar' ) {
+        include dcrm
+        include dcrm::controller_pulsar
+      }
+  } else {
+    if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.pivot_scheduler.PivotScheduler' ) {
+        include dcrm
+        include dcrm::ha_controller_secondary
+      }
+      
+      if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.filter_scheduler.FilterScheduler.Pulsar' ) {
+        include dcrm
+        include dcrm::ha_controller_secondary_pulsar
+      }
   }
+ }
 
 
   class virtual_ips () {

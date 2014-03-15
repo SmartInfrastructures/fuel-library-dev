@@ -84,5 +84,4 @@ class odc (
    	      command => "/usr/bin/python /home/osdatacollector/openstackDataCollector.py &",
    	      path    => "/usr/local/bin/:/bin/:/usr/bin/python",
 	}
-}       
-
+}
