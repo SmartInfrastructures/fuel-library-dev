@@ -20,22 +20,18 @@ from keystoneclient.v2_0 import tokens
 
 ######################################################
 ##Configure this parameter in order to work with API##
-username='xxxx'
-password='xxx'
+username='xxxxx'
+password='xxxxxxxxxxxxxxxxx'
 tenant_name='xxxx'
-auth_url='http://172.16.0.10:35357/v2.0'
-token='xxxxx'
-regionName='Berlin'
-regionId='Berlin'
+auth_url='http://xxx.xxx.xxx.xxx:35357/v2.0'
+tokenCLI='xxxxxxxx'
+regionName='Trento'
+regionId='Trento'
 location='IT'
-latitude='42.0678700'
-longitude='1.1210800'
-agentUrl='localhost:1337/'
+latitude='46.07'
+longitude='11.12'
+agentUrl='xxx.xxx.xxx.xxx:1337/'
 ######################################################
-
-
-
-entity_name=regionName
 
 def getRegion():
  '''This function returns the RegionId'''
@@ -48,7 +44,7 @@ def getnVM():
  '''This function computes the total number and the number of active VMs in the scenario'''
  nVMActive=0
  nVMTot=0
- cmd=["nova", "list"]
+ cmd=["nova", "list", "--all-tenants"]
  p=Popen(cmd, stdout=PIPE, stderr=PIPE,env=os.environ)
  stdout, stderr=p.communicate()
  arrayVal=stdout.split('\n')
@@ -60,7 +56,7 @@ def getnVM():
   del arrayVal[0]
   for i in range ((len(arrayVal)-1),-1,-1):
    #print (arrayVal[i])
-   if (arrayVal[i].find('-----')):
+   if (arrayVal[i].find('-----')==1):
     del arrayVal[i]
    else:
     vmstat=arrayVal[i].split('|')
@@ -82,6 +78,7 @@ def getinfo():
  nHDUSed   : size of the used Hard Disk
  nHDTot    : Maximum Hard Disk spce available 
  '''
+ nCoreEnable=0
  nCoreTot=0
  nCoreUsed=0
  nRamTot=0
@@ -89,30 +86,29 @@ def getinfo():
  nHDTot=0
  nHDUsed=0
  computeUnity=[]
- cmd=["nova", "host-list"]
+
+ cmd=["nova-manage", "service","list"]
  p=Popen(cmd, stdout=PIPE, stderr=PIPE,env=os.environ)
  stdout, stderr=p.communicate()
  if(len(stdout)>0):
   arrayVal=stdout.split('\n')
   if (len(arrayVal)>0):
-   del arrayVal[(len(arrayVal)-1)]
-   del arrayVal[(len(arrayVal)-1)]
-   del arrayVal[2]
-   del arrayVal[1]
    del arrayVal[0]
    for i in range(len(arrayVal)):
-    splitVal=arrayVal[i].split('|')
-    if( ("".join(splitVal[2]).split())[0] =='compute'):
+    splitVal=(" ".join(arrayVal[i].split())).split(' ')
+    if( 'nova-compute' in splitVal[0]):
+     state="NO";
+     if( ':-)' in splitVal[4]):
+      state="OK";
      try:
-      computeUnity[("".join(splitVal[1]).split())[0]]
+      computeUnity.append([splitVal[1], state])
      except:
-      computeUnity.append(("".join(splitVal[1]).split())[0])
-
+      print ("Error")
    if(len(computeUnity)>0):
     for l in computeUnity:
      stdout=''
      stderr=''
-     cmd=["nova", "host-describe",l]
+     cmd=["nova", "host-describe", l[0]]
      p=Popen(cmd, stdout=PIPE, stderr=PIPE)
      stdout, stderr=p.communicate()
      if (len(stdout)>0):
@@ -127,6 +123,8 @@ def getinfo():
         tmpVal=t.split('|')
         if (("".join(tmpVal[2]).split())[0]=="(total)"):
          #Total CPU RAM DISK
+         if('OK' in l[1]):
+          nCoreEnable+=int(("".join(tmpVal[3]).split())[0]);
          nCoreTot+=int(("".join(tmpVal[3]).split())[0])
          nRamTot +=int(("".join(tmpVal[4]).split())[0])
          nHDTot  +=int(("".join(tmpVal[5]).split())[0])
@@ -134,63 +132,163 @@ def getinfo():
          nCoreUsed+=int(("".join(tmpVal[3]).split())[0])
          nRamUsed +=int(("".join(tmpVal[4]).split())[0])
          nHDUsed  +=int(("".join(tmpVal[5]).split())[0])
- return nCoreTot,nCoreUsed,nRamTot,nRamUsed,nHDTot,nHDUsed
+ return nCoreEnable,nCoreTot,nCoreUsed,nRamTot,nRamUsed,nHDTot,nHDUsed
+
 
 def getUsers():
  '''getUsers returns the number of users in the system '''
  nUsers=0
- keystone=client.Client(username=username,password=password,tenant_name=tenant_name, auth_url=auth_url)
- token=keystone.auth_token
- keystone.auth_token
- headers={'X-Auth-Token':token}
- tenant_url=auth_url
- tenant_url+='/users'
- r=requests.get(tenant_url, headers=headers)
- userData=json.loads(r.text)
- nUsers = (len(userData['users']))
+ #keystone=client.Client(username=username,password=password,tenant_name=tenant_name, auth_url=auth_url)
+ #token=keystone.auth_token
+ #keystone.auth_token
+ #headers={'X-Auth-Token':token}
+ #tenant_url=auth_url
+ #tenant_url+='/users'
+ #r=requests.get(tenant_url, headers=headers)
+ #userData=json.loads(r.text)
+ #nUsers = (len(userData['users']))
  return nUsers
+
+def getVmImage():
+ #image_vm_list=[];
+ image_vm_str='';
+ cmd=["nova", "image-list"]
+ p=Popen(cmd, stdout=PIPE, stderr=PIPE,env=os.environ)
+ stdout, stderr=p.communicate()
+ if(len(stdout)>0):
+  arrayVal=stdout.split('\n')
+  if (len(arrayVal)>0):
+   del arrayVal[(len(arrayVal)-1)]
+   del arrayVal[(len(arrayVal)-1)]
+   del arrayVal[2]
+   del arrayVal[1]
+   del arrayVal[0]
+   tmp_id='';tmp_name='';tmp_status='';
+   for i in range(len(arrayVal)):
+    splitVal=arrayVal[i].split('|')
+    tmp_id=splitVal[1].strip();
+    tmp_name=splitVal[2].strip();
+    tmp_status=splitVal[3].strip();
+    try:
+     image_vm_str+=tmp_id+'#'+tmp_name+'#'+tmp_status+';'
+     #image_vm_list.append([tmp_id,tmp_name,tmp_status])
+    except:
+     print ("Error")
+ return image_vm_str;
+
+def getVmList():
+ base_vm_list=[]
+ #full_vm_list=[]
+ full_vm_str='';
+ cmd=["nova", "list","--all-tenants"]
+ p=Popen(cmd, stdout=PIPE, stderr=PIPE,env=os.environ)
+ stdout, stderr=p.communicate()
+ if(len(stdout)>0):
+  arrayVal=stdout.split('\n')
+  if (len(arrayVal)>0):
+   del arrayVal[(len(arrayVal)-1)]
+   del arrayVal[(len(arrayVal)-1)]
+   del arrayVal[2]
+   del arrayVal[1]
+   del arrayVal[0]
+   for i in range(len(arrayVal)):
+    splitVal=arrayVal[i].split('|')
+    tmp_id =("".join(splitVal[1]).split())[0];
+    tmp_name =("".join(splitVal[2]).split())[0];
+    tmp_status =("".join(splitVal[3]).split())[0];
+    if (len(splitVal[4])>0):
+     tmp_net =splitVal[4].replace(", ", "+").replace(";", " _and_ ").strip();
+    else:
+     tmp_net='none'
+    tmp_vm=[tmp_id, tmp_name, tmp_status, tmp_net];
+    try:
+     base_vm_list.append(tmp_vm)
+    except:
+     print ("Error")
+   if(len(base_vm_list)>0):
+    for l in base_vm_list:
+     tmp_cre='';tmp_fla='';tmp_img='';tmp_key='';tmp_sec='';tmp_user='';tmp_ten='';
+     stdout=''
+     stderr=''
+     tmp_vm_Full=[]
+     cmd=["nova", "show",l[0]]
+     p=Popen(cmd, stdout=PIPE, stderr=PIPE)
+     stdout, stderr=p.communicate()
+     if (len(stdout)>0):
+      arrayInfo=stdout.split('\n');
+      if (len(arrayInfo)>5):
+       del arrayInfo[(len(arrayInfo)-1)]
+       del arrayInfo[(len(arrayInfo)-1)]
+       del arrayInfo[2]
+       del arrayInfo[1]
+       del arrayInfo[0]
+       for t in  arrayInfo:
+        tmpVal=t.split('|')
+        if (tmpVal[1]!=''):
+         if ("created"in tmpVal[1]):
+          tmp_cre=tmpVal[2].strip();
+         if ("flavor" in tmpVal[1]):
+          tmp_fla=tmpVal[2].strip();
+         if ("image" in tmpVal[1]):
+          tmp_img=tmpVal[2].strip();
+         if ("key_name" in tmpVal[1]):
+          tmp_key=tmpVal[2].strip();
+         #if ((tmpVal[1].split())=="security_groups"):
+         if("security_groups" in tmpVal[1]):
+          if (tmpVal[2]!=''):
+           tmp_sec=tmpVal[2].replace(',',' _and_').replace('name','').replace(':','').replace('u','').replace('\'','').replace('{','').replace('[','').replace(']','').replace('}','').strip();
+         if ("tenant_id" in tmpVal[1]):
+          tmp_ten=tmpVal[2].strip();
+         if ("user_id" in tmpVal[1]):
+          tmp_user=tmpVal[2].strip();
+      try:
+       #full_vm_list.append([l[0],l[1],tmp_img,tmp_fla,tmp_sec,l[2],tmp_key,tmp_cre,tmp_ten,tmp_user, l[3]])
+       full_vm_str+=l[0]+'#'+l[1]+'#'+tmp_img+'#'+tmp_fla+'#'+tmp_sec+'#'+l[2]+'#'+tmp_key+'#'+tmp_cre+'#'+tmp_ten+'#'+tmp_user+'#'+l[3]+';'
+      except:
+       print ("Error")
+ return full_vm_str;
 
 def findInfo(dump):
  '''find info meges all information previously collected in a human readable format '''
  nVMActive, nVMTot=getnVM()
- nCoreTot,nCoreUsed,nRamTot,nRamUsed,nHDTot,nHDUsed=getinfo()
+ nCoreEnable,nCoreTot,nCoreUsed,nRamTot,nRamUsed,nHDTot,nHDUsed=getinfo()
  nUsers=getUsers()
  nRegion=getRegion()
+ vmImage=getVmImage();
+ vmList=getVmList();
  if (dump==1):
-  out_file = open("results.dumped","w")
-  out_file.write("Dummy file generated for test pourpose\n")
-  out_file.write("on: "+strftime("%Y-%m-%d %H:%M:%S", gmtime())+"\n")
-  out_file.write ('#================================#\n')
-  out_file.write ('Region id         : '+str(regionId)+"\n")
-  out_file.write('VM active/tot     : '+str(nVMActive)+'/'+str(nVMTot)+"\n")
-  out_file.write('Core used/tot     : '+str(nCoreUsed)+'/'+str(nCoreTot)+"\n")
-  out_file.write('RAM used/tot [MB] : '+str(nRamUsed)+'/'+str(nRamTot)+"\n")
-  out_file.write('HD used/tot [GB]  : '+str(nHDUsed)+'/'+str(nHDTot)+"\n")
-  out_file.write('Users             : '+str(nUsers)+"\n")
-  out_file.write ('#================================#\n')
-  out_file.close()
-  dump=0
-  sys.exit()
+  out_file = open("results.dumped","w");
+  out_file.write("Dummy file generated for test pourpose\n");
+  out_file.write("on: "+strftime("%Y-%m-%d %H:%M:%S", gmtime())+"\n");
+  out_file.write ('#================================#\n');
+  out_file.write ('Region id         : '+str(regionId)+"\n");
+  out_file.write ('VM active/tot     : '+str(nVMActive)+'/'+str(nVMTot)+"\n");
+  out_file.write ('Core used/tot     : '+str(nCoreUsed)+'/'+str(nCoreEnable)+'/'+str(nCoreTot)+"\n");
+  out_file.write ('RAM used/tot [MB] : '+str(nRamUsed)+'/'+str(nRamTot)+"\n");
+  out_file.write ('HD used/tot [GB]  : '+str(nHDUsed)+'/'+str(nHDTot)+"\n");
+  out_file.write ('Users             : '+str(nUsers)+"\n");
+  out_file.write ('Images            : '+vmImage+"\n");
+  out_file.write ('VMs               : '+vmList+"\n");
+  out_file.write ('#================================#\n');
+  out_file.close();
+  dump=0;
+  sys.exit();
 
- return nRegion, nVMActive, nVMTot, nCoreUsed, nCoreTot, nRamUsed, nRamTot,nHDUsed, nHDTot, nUsers, location, latitude, longitude
-
-
+ return nRegion, nVMActive, nVMTot, nCoreUsed, nCoreEnable, nCoreTot, nRamUsed, nRamTot,nHDUsed, nHDTot, nUsers, location, latitude, longitude, vmImage, vmList
 
 def updateContext(entity_name,timestamp, dump):
-  nRegion, nVMActive, nVMTot, nCoreUsed, nCoreTot, nRamUsed, nRamTot,nHDUsed, nHDTot,nUsers, location, latitude, longitude=findInfo(dump)
+  nRegion, nVMActive, nVMTot, nCoreUsed, nCoreEnable, nCoreTot, nRamUsed, nRamTot,nHDUsed, nHDTot,nUsers, location, latitude, longitude, vmImage, vmList=findInfo(dump)
   c = pycurl.Curl()
   c.setopt(c.URL, agentUrl+'region?id='+entity_name+'&type=region')
   c.setopt(c.HTTPHEADER, ['Content-Type: application/xml'])
-  updated_body="coreUsed:"+str(nCoreUsed)+",coreTot:"+str(nCoreTot)+",vmUsed:"+str(nVMActive)+",vmTot:"+str(nVMTot)+",hdUsed:"+str(nHDUsed)+",hdTot:"+str(nHDTot)+",ramUsed:"+str(nRamUsed)+",ramTot:"+str(nRamTot)+",nUser:"+str(nUsers)+",location:"+location+",latitude:"+str(latitude)+", longitude:"+str(longitude)+""
+  updated_body="coreUsed::"+str(nCoreUsed)+",coreEnabled::"+str(nCoreEnable)+",coreTot::"+str(nCoreTot)+",vmUsed::"+str(nVMActive)+",vmTot::"+str(nVMTot)+",hdUsed::"+str(nHDUsed)+",hdTot::"+str(nHDTot)+",ramUsed::"+str(nRamUsed)+",ramTot::"+str(nRamTot)+",nUser::"+str(nUsers)+",location::"+location+",latitude::"+str(latitude)+", longitude::"+str(longitude)+", vmImage::"+vmImage+", vmList::"+vmList+"";
+  #print updated_body;
   c.setopt(c.POSTFIELDS, updated_body)
   c.setopt(c.POST, 1)
   try:
     c.perform()
   except:
     print("Unable to connect to the contextBroker")
-
-
-
 
 def getTime():
   p=strftime("%Y-%m-%d %H:%M:%S", gmtime())
@@ -204,7 +302,7 @@ def printfunc():
 def triggerEvent(dump):
   while True:
     updateContext(entity_name,getTime(), dump)
-    time.sleep(60.0)
+    time.sleep(300.0)
 
 ##main function
 dump=0
@@ -223,7 +321,7 @@ try:
         if(optArray[0].rstrip()=="auth_url"):
           auth_url=optArray[1].replace(" ","").rstrip();
         if(optArray[0].rstrip()=="token"):
-          token=optArray[1].replace(" ","").rstrip();
+          tokenCLI=optArray[1].replace(" ","").rstrip();
         if(optArray[0].rstrip()=="regionId"):
           regionId=optArray[1].replace(" ","").rstrip();
         if(optArray[0].rstrip()=="regionName"):
@@ -242,12 +340,13 @@ except IOError:
 
 
 ##set env variable
-os.environ['OS_USERNAME']=username
-os.environ['OS_PASSWORD']=password
-os.environ['OS_TENANT_NAME']=tenant_name
-os.environ['SERVICE_ENDPOINT']=auth_url
-os.environ['OS_AUTH_URL']=auth_url
-os.environ['SERVICE_TOKEN']=token
+entity_name=regionId.rstrip();
+os.environ['OS_USERNAME']=username;
+os.environ['OS_PASSWORD']=password;
+os.environ['OS_TENANT_NAME']=tenant_name;
+os.environ['SERVICE_ENDPOINT']=auth_url;
+os.environ['OS_AUTH_URL']=auth_url;
+os.environ['SERVICE_TOKEN']=tokenCLI;
 
 
 
