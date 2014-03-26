@@ -36,50 +36,46 @@ class odc (
               recurse => true,
               mode => 0777
             }->
-	augeas 	{ 'update_file_odc_1':
-			context =>  "/files/home/osdatacollector/odc.conf/.odc/",
-		        changes =>  "set username ${username}"
-                }->
-	augeas 	{ 'update_file_odc_2':
-			context =>  "/files/home/osdatacollector/odc.conf/.odc/",
-		        changes =>  "set password ${password}"
-                }->
-	augeas 	{ 'update_file_odc_3':
-			context =>  "/files/home/osdatacollector/odc.conf/.odc/",
-		        changes =>  "set tenant_name ${tenant_name}"
-                }->
-	augeas 	{ 'update_file_odc_4':
-			context =>  "/files/home/osdatacollector/odc.conf/.odc/",
-		        changes =>  "set auth_url ${auth_url}"
-                }->
-	augeas 	{ 'update_file_odc_5':
-			context =>  "/files/home/osdatacollector/odc.conf/.odc/",
-		        changes =>  "set token ${token}"
-                }->
-	augeas 	{ 'update_file_odc_6':
-			context =>  "/files/home/osdatacollector/odc.conf/.odc/",
-		        changes =>  "set regionName ${region_name}"
-                }->
-	augeas 	{ 'update_file_odc_7':
-			context =>  "/files/home/osdatacollector/odc.conf/.odc/",
-		        changes =>  "set regionId ${region_id}"
-                }->
-	augeas 	{ 'update_file_odc_8':
-			context =>  "/files/home/osdatacollector/odc.conf/.odc/",
-		        changes =>  "set location ${location}"
-                }->
-	augeas 	{ 'update_file_odc_9':
-			context =>  "/files/home/osdatacollector/odc.conf/.odc/",
-		        changes =>  "set latitude ${latitude}"
-                }->
-	augeas 	{ 'update_file_odc_10':
-			context =>  "/files/home/osdatacollector/odc.conf/.odc/",
-		        changes =>  "set longitude ${longitude}"
-                }->
-	augeas 	{ 'update_file_odc_11':
-			context =>  "/files/home/osdatacollector/odc.conf/.odc/",
-		        changes =>  "set agentUrl ${agent_url}"
-		}->
+	file_line  { 'odc_config_1':
+			line => "username=${username}",
+			path => '/home/osdatacollector/odc.conf'
+            }->
+	file_line  { 'odc_config_2':
+			line => "password=${password}",
+			path => '/home/osdatacollector/odc.conf'
+            }->
+	file_line  { 'odc_config_3':
+			line => "tenant_name=${tenant_name}",
+			path => '/home/osdatacollector/odc.conf'
+            }->	
+	file_line  { 'odc_config_4':
+			line => "auth_url=${auth_url}",
+			path => '/home/osdatacollector/odc.conf'
+            }->
+	file_line  { 'odc_config_5':
+			line => "token=${token}",
+			path => '/home/osdatacollector/odc.conf'
+            }->
+	file_line  { 'odc_config_6':
+			line => "regionName=${region_name}",
+			path => '/home/osdatacollector/odc.conf'
+            }->
+	file_line  { 'odc_config_7':
+			line => "regionId=${region_id}",
+			path => '/home/osdatacollector/odc.conf'
+            }->
+	file_line  { 'odc_config_8':
+			line => "location=${location}",
+			path => '/home/osdatacollector/odc.conf'
+            }->
+	file_line  { 'odc_config_9':
+			line => "latitude=${latitude}",
+			path => '/home/osdatacollector/odc.conf'
+            }->
+	file_line  { 'odc_config_10':
+			line => "agentUrl=${agent_url}",
+			path => '/home/osdatacollector/odc.conf'
+            }->
 	exec { "run_osd":
    	      command => "/usr/bin/python /home/osdatacollector/openstackDataCollector.py &",
    	      path    => "/usr/local/bin/:/bin/:/usr/bin/python",
