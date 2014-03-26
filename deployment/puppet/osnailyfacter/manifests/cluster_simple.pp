@@ -343,7 +343,6 @@ class osnailyfacter::cluster_simple {
 	         }
 	}
 
-
       if $monitoring_hash['use_nagios'] {
 
         # for completeness we should include "rabbit" and "mysql" but there are some issues with the nrpe to be explored
@@ -459,6 +458,8 @@ class osnailyfacter::cluster_simple {
    
    #ADDONS XIFI START
    "monitoring" : {
+    include nodejs
+    
     if $monitoring_hash['use_nagios'] {
         # for completeness we should include "rabbit" and "mysql" but there are some issues with the nrpe to be explored
 	      class {'nagios::master':
@@ -477,6 +478,11 @@ class osnailyfacter::cluster_simple {
 		      contacts        => {'email' => $monitoring_hash['nagios_mail_alert']}
 	      }        
       }
+    # Context-Broker
+    if $monitoring_hash['use_context_broker'] {
+      include context-broker
+    }
+
     } # MONITORING ENDS
     
     #ADDONS XIFI END
