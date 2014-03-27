@@ -33,10 +33,6 @@ class cinder::volume::iscsi (
           before  => Service["tgtd"],
           notify  => Service["tgtd"]
         }
-	file_line { 'nova_conf_cinder_catalog':
-			line => "cinder_catalog_info=volume:cinder:internalURL",
-			path => '/etc/nova/nova.conf'
-        }
     }
 
     'ietadm': {
