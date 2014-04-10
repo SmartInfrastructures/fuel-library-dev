@@ -225,9 +225,7 @@ class horizon(
     subscribe => File[$::horizon::params::local_settings_path,
                       $::horizon::params::logdir],
   }
-   package { "lessc":
-    ensure => "installed"
-  }->
+  
    exec {"refresh horizon static":
 	    path        => ['/bin','/sbin','/usr/sbin','/usr/bin'],
 	    command     => "su $wsgi_user -s '/bin/bash' -c 'cd /usr/share/openstack-dashboard && python manage.py compress --force'",
