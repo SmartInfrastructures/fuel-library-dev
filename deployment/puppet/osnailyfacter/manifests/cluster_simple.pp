@@ -462,6 +462,7 @@ class osnailyfacter::cluster_simple {
    
    #ADDONS XIFI START
    "monitoring" : {
+   
     include nodejs
     
     if $monitoring_hash['use_nagios'] {
@@ -486,6 +487,11 @@ class osnailyfacter::cluster_simple {
     if $monitoring_hash['use_context_broker'] {
       include context-broker
     }
+	
+    # NGSI_Adapter - Fiware monitoring
+    if $monitoring_hash['use_ngsi_adapter'] {
+      include fiware-monitoring
+    }	
 
     } # MONITORING ENDS
     
