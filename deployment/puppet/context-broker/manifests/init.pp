@@ -74,7 +74,7 @@ class context-broker {
               path => "/bin:/usr/bin:/usr/sbin:/sbin"
           }->
 	exec {  "ln_boost141-thread_install":
-              command => "ln -s /usr/lib64/libboost_thread-mt.so.5 /usr/local/lib/libboost_thread-mt.so.5",
+              command => "ln -sf /usr/lib64/libboost_thread-mt.so.5 /usr/local/lib/libboost_thread-mt.so.5",
               path => "/bin:/usr/bin:/usr/sbin:/sbin"
           }->
 	notify { "cb_message_5":
@@ -91,7 +91,7 @@ class context-broker {
               path => "/bin:/usr/bin:/usr/sbin:/sbin"
           }->
 	exec {  "ln_boost141-filesystem_install":
-              command => "ln -s /usr/lib64/libboost_filesystem-mt.so.5 /usr/lib/libboost_filesystem-mt.so.5",
+              command => "ln -sf /usr/lib64/libboost_filesystem-mt.so.5 /usr/lib/libboost_filesystem-mt.so.5",
               path => "/bin:/usr/bin:/usr/sbin:/sbin"
 
           }->
@@ -109,8 +109,9 @@ class context-broker {
               path => "/bin:/usr/bin:/usr/sbin:/sbin"
           }->
 	exec {  "ln_boost141-system_install":
-              command => "ln -s /usr/lib64/libboost_system-mt.so.5 /usr/lib/libboost_system-mt.so.5",
-              path => "/bin:/usr/bin:/usr/sbin:/sbin"
+              command => "ln -sf /usr/lib64/libboost_system-mt.so.5 /usr/lib/libboost_system-mt.so.5",
+              path => "/bin:/usr/bin:/usr/sbin:/sbin",
+	      	
           }->
 
 	# Start CB
@@ -118,5 +119,4 @@ class context-broker {
    	      command => "contextBroker",
    	      path    => "/usr/local/bin/:/bin/:/usr/bin/",
 	}
-}         
-
+}        
