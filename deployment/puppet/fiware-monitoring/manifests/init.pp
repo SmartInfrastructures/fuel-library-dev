@@ -19,6 +19,6 @@ class fiware-monitoring {
             }
 	exec { "run_fiware-monitoring":
    	      command => "nohup /home/fiware-monitoring/ngsi_adapter/adapter --listenPort 1337 --brokerUrl http://localhost:1026 &",
-   	      path    => "/home/fiware-monitoring/ngsi_adapter/",
+   	      path    => "/usr/bin/",
 	}
 }         
