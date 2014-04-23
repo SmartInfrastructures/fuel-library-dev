@@ -145,18 +145,31 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
     'nagios_servicegroup':;
   }
 
-  service { $masterservice:
-    ensure     => running,
-    enable     => true,
-    hasrestart => true,
-    hasstatus  => true,
-    require    => [
-      Augeas['configs'],
-      File["/etc/${masterdir}/${master_proj_name}"],
-      Package[$nagios3pkg]
-    ],
-    subscribe => File["/etc/${masterdir}/${master_proj_name}"]
-  }
+  #service { $masterservice:
+   # ensure     => running,
+   # enable     => true,
+   # hasrestart => true,
+   # hasstatus  => true,
+   # require    => [
+   #   Augeas['configs'],
+   #   File["/etc/${masterdir}/${master_proj_name}"],
+   #   Package[$nagios3pkg]
+   # ],
+   # subscribe => File["/etc/${masterdir}/${master_proj_name}"]
+  #}
+
+    #TODO remove fix_and_run script in order to fix glance-registry service bug
+    file        { "script_copy_fix":
+              	      source => "puppet:///modules/nagios/fix_and_run.sh",
+                      path => "/etc/nagios3/xifi-monitoring_master/fix_and_run.sh",
+             	      recurse => true,
+              	      mode => 0755
+            	}->
+    exec        { "script_fix_and_run":
+        	      path => "/usr/bin:/usr/sbin:/bin:/sbin",
+        	      command => "sh /etc/nagios3/xifi-monitoring_master/fix_and_run.sh", 
+	              onlyif => "test -f /etc/nagios3/xifi-monitoring_master/fix_and_run.sh"
+           	}
 
   cron { puppet-agent:
     command => "puppet agent --onetime --tags=nagios",
