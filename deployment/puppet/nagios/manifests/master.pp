@@ -59,7 +59,6 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
       command => 'dpkg-statoverride --update --add nagios nagios 751 /var/lib/nagios3 && dpkg-statoverride --update --add nagios www-data 2710 /var/lib/nagios3/rw',
       path    => ['/bin','/sbin','/usr/sbin/','/usr/sbin/'],
       unless  => 'dpkg-statoverride --list nagios nagios 751 /var/lib/nagios3 && dpkg-statoverride --list nagios www-data 2710 /var/lib/nagios3/rw',
-      notify  => Service[$masterservice],
     }
     #temp - we will fix the iso ;)
   }
@@ -69,7 +68,6 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
       command     => "chmod -R go+r /etc/${masterdir}/${master_proj_name}",
       path        => ['/bin','/sbin','/usr/sbin/','/usr/sbin/'],
       refreshonly => true,
-      notify      => Service[$masterservice],
     }
 
   package {$nagios3pkg:}
@@ -92,7 +90,6 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
           'set check_external_commands 1',
         ],
         require => Package[$nagios3pkg],
-        notify  => Service[$masterservice],
       }
     }
     'Debian': {
@@ -105,7 +102,6 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
           'set check_external_commands 1',
         ],
         require => Package[$nagios3pkg],
-        notify  => Service[$masterservice],
       }
     }
   }
@@ -126,7 +122,6 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
 
   file { "/etc/${masterdir}/${master_proj_name}":
     recurse => true,
-    notify  => Service[$masterservice],
     source  => 'puppet:///modules/nagios/common/etc/nagios3/conf.d',
   }
 
@@ -145,30 +140,17 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
     'nagios_servicegroup':;
   }
 
-  #service { $masterservice:
-   # ensure     => running,
-   # enable     => true,
-   # hasrestart => true,
-   # hasstatus  => true,
-   # require    => [
-   #   Augeas['configs'],
-   #   File["/etc/${masterdir}/${master_proj_name}"],
-   #   Package[$nagios3pkg]
-   # ],
-   # subscribe => File["/etc/${masterdir}/${master_proj_name}"]
-  #}
-
     #TODO remove fix_and_run script in order to fix glance-registry service bug
     file        { "script_copy_fix":
               	      source => "puppet:///modules/nagios/fix_and_run.sh",
-                      path => "/etc/nagios3/xifi-monitoring_master/fix_and_run.sh",
+                      path => "/etc/${masterdir}/${master_proj_name}/fix_and_run.sh",
              	      recurse => true,
               	      mode => 0755
-            	}->
+            	}
     exec        { "script_fix_and_run":
         	      path => "/usr/bin:/usr/sbin:/bin:/sbin",
-        	      command => "sh /etc/nagios3/xifi-monitoring_master/fix_and_run.sh", 
-	              onlyif => "test -f /etc/nagios3/xifi-monitoring_master/fix_and_run.sh"
+        	      command => "sh /etc/${masterdir}/${master_proj_name}/fix_and_run.sh", 
+	              onlyif => "test -f /etc/${masterdir}/${master_proj_name}/fix_and_run.sh",
            	}
 
   cron { puppet-agent:
