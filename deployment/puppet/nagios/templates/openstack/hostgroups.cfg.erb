@@ -2,7 +2,8 @@
 <% if hostgroups.kind_of? Array %>
 <% hostgroups.each do |host| %>
 define hostgroup{
-  hostgroup_name <%= host %> 
+  hostgroup_name <%= host %>
+  members        * 
 }
 <% end %>
 <% end %>
