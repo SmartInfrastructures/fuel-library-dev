@@ -551,6 +551,11 @@ class osnailyfacter::cluster_ha {
     if $monitoring_hash['use_context_broker'] {
       include context-broker
     }
+  
+   # NGSI_Adapter - Fiware monitoring
+    if $monitoring_hash['use_ngsi_adapter'] {
+      include fiware-monitoring
+    }	
 
     } # MONITORING ENDS
     
