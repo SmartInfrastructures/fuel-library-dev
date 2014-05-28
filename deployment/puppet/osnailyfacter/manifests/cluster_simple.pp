@@ -350,7 +350,7 @@ class osnailyfacter::cluster_simple {
       if $monitoring_hash['use_nagios'] {
 
         # for completeness we should include "rabbit" and "mysql" but there are some issues with the nrpe to be explored
-        $basic_services = ['keystone', 'nova-scheduler', 'cinder-scheduler','memcached','nova-api','cinder-api','glance-api','glance-         registry','horizon']
+        $basic_services = ['keystone', 'nova-scheduler', 'cinder-scheduler','memcached','nova-api','cinder-api','glance-api','glance-registry','horizon']
 
         $network_services = $::use_quantum ? {
           true  => ['quantum-api'],
