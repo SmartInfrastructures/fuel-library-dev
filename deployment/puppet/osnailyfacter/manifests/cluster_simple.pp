@@ -81,6 +81,11 @@ class osnailyfacter::cluster_simple {
 
   $controller_node_address = $controller[0]['internal_address']
   $controller_node_public = $controller[0]['public_address']
+ 
+  $monitoring = filter_nodes($nodes_hash,'role','monitoring')
+
+  $monitoring_node_address = $monitoring[0]['internal_address']
+  $monitoring_node_public = $monitoring[0]['public_address']
 
 
   if ($::fuel_settings['cinder']) {
@@ -363,7 +368,7 @@ class osnailyfacter::cluster_simple {
         class {'nagios':
                proj_name	=> 'xifi-monitoring',
                services		=> $controller_services,
-               whitelist	=> ['127.0.0.1', $controller_node_address, $controller_node_public],
+               whitelist	=> [$monitoring_node_address, $monitoring_node_public, $controller_node_address, $controller_node_public],
                hostgroup	=> 'controller-nodes'
         }
       }
@@ -451,7 +456,7 @@ class osnailyfacter::cluster_simple {
         class {'nagios':
                proj_name        => 'xifi-monitoring',
                services         => $compute_services,
-               whitelist        => ['127.0.0.1', $controller_node_address, $controller_node_public],
+               whitelist        => [$monitoring_node_address, $monitoring_node_public, $controller_node_address, $controller_node_public],
                hostgroup        => 'compute-nodes'
         }
       }
@@ -474,12 +479,13 @@ class osnailyfacter::cluster_simple {
 		      mysql_user      => 'root',
 		      mysql_pass      => $mysql_hash[root_password],
 		      mysql_port      => '3307',
-		      rabbit_pass	=> $rabbit_hash['password'],
+		      rabbit_pass   	=> $rabbit_hash['password'],
 		      rabbit_user     => $rabbit_hash['user'],
 		      rabbit_port     => '5673',
 		      templatehost    => {'name' => 'default-host', 'check_interval' => $monitoring_hash['nagios_host_check_interval']},
 		      templateservice => {'name' => 'default-service', 'check_interval'=> $monitoring_hash['nagios_service_check_interval']},
-		      contactgroups   => {'group' => 'admins', 'alias' => 'Admins'},
+          htpasswd        => {'nagiosadmin' => $monitoring_hash['nagios_admin_pwd']},		     
+          contactgroups   => {'group' => 'admins', 'alias' => 'Admins'},
 		      contacts        => {'email' => $monitoring_hash['nagios_mail_alert']}
 	      }        
       }
@@ -537,7 +543,7 @@ class osnailyfacter::cluster_simple {
         class {'nagios':
                proj_name        => 'xifi-monitoring',
                services         => ['cinder-volume'],
-               whitelist        => ['127.0.0.1', $controller_node_address, $controller_node_public],
+               whitelist        => [$monitoring_node_address, $monitoring_node_public, $controller_node_address, $controller_node_public],
                hostgroup        => 'volume-nodes'
         }
       }
