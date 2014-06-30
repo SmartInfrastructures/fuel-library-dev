@@ -84,9 +84,16 @@ class osnailyfacter::cluster_simple {
  
   $monitoring = filter_nodes($nodes_hash,'role','monitoring')
 
-  $monitoring_node_address = $monitoring[0]['internal_address']
-  $monitoring_node_public = $monitoring[0]['public_address']
-
+  if !$monitoring {
+    $monitoring_node_address = $monitoring[0]['internal_address']
+  } else {
+    $monitoring_node_address = '127.0.0.1'  
+  }
+ if !$monitoring {
+     $monitoring_node_public = $monitoring[0]['public_address']
+    } else {
+  $monitoring_node_public = '127.0.0.1'
+ }
 
   if ($::fuel_settings['cinder']) {
     if (member($cinder_nodes_array,'all')) {
