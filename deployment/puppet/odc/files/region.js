@@ -12,7 +12,7 @@ var nagios = require('./common/nagios');
 var parser = Object.create(nagios.parser);
 parser.getContextAttrs = function(multilineData, multilinePerfData) {
     var data  = multilineData.split('\n')[0];   // only consider first line of data, discard perfData
-    var attrs = { coreUsed: NaN, coreEnabled: NaN, coreTot: NaN , vmUsed: NaN, vmTot: NaN,hdUsed: NaN,hdTot: NaN,ramUsed: NaN,ramTot: NaN,  nUser: NaN, location: NaN, latitude: NaN, longitude: NaN, vmImage:NaN, vmList:NaN};
+    var attrs = { coreUsed: NaN, coreEnabled: NaN, coreTot: NaN , vmUsed: NaN, vmTot: NaN,hdUsed: NaN,hdTot: NaN,ramUsed: NaN,ramTot: NaN,  location: NaN, latitude: NaN, longitude: NaN, vmImage:'', vmList:'', timeSample:NaN};
     var items = data.split(',');
     if ((items.length)>0 ) {
         for (var i = 0; i < items.length; i++){
@@ -44,17 +44,23 @@ parser.getContextAttrs = function(multilineData, multilinePerfData) {
             if (element.split('::')[0].replace(/\s/g, '')=="longitude")
                 attrs.longitude=element.split('::')[1].replace(/['\s]/g, '')
             if (element.split('::')[0].replace(/\s/g, '')=="vmImage")
-                attrs.vmImage=(element.split('::')[1]).replace(/#/g,',')
-                //attrs.vmImage='a'
+                if((element.split('::')[1]).replace(/#/g,','))
+                  attrs.vmImage=(element.split('::')[1]).replace(/#/g,',')
+                else attrs.vmImage=0;
             if (element.split('::')[0].replace(/\s/g, '')=="vmList")
-                attrs.vmList=element.split('::')[1].replace(/#/g,',')
+                if((element.split('::')[1]).replace(/#/g,','))
+                  attrs.vmList=element.split('::')[1].replace(/#/g,',')
+                else attrs.vmList=0;
+            if (element.split('::')[0].replace(/\s/g, '')=="timeSample")
+                if(element.split('::')[1].replace(/\s/g, ''))
+                  attrs.timeSample=element.split('::')[1].replace(/\s/g, '');
+                else attrs.timeSample=0;
+
 	}
     }
     else{
         throw new Error('No valid users data found');
     }
-    console.log(attrs);
     return attrs;
 };
 exports.parser = parser;
-

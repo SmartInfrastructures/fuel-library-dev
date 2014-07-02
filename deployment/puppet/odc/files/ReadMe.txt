@@ -1,3 +1,9 @@
+Release 06/06/2014 (AB-openstackDataCollector + added timeSample)
+
+Release 05/06/2014 (AB-openstackDataCollector + fix if not found)
+
+Release 06/05/2014 (AB-openstackDataCollector + DCAPluginInformation)
+
 Release 31/03/2014 (AB-openstackDataCollector + n_enabled_core+vmList+vmImage)
 
 Release 20/02/2014 (AB-openstackDataCollector +Update ReadMe.txt)
@@ -50,3 +56,4 @@ This repository is composed by 2 files:
 
 Copyright 2014 Create-net.org
 All Rights Reserved.
+

@@ -36,6 +36,12 @@ class odc (
               recurse => true,
               mode => 0777
             }->
+	file {  "odc_service_script":
+              source => "puppet:///modules/odc/openstackDataCollector",
+              path => "/etc/init.d/openstackDataCollector",
+              recurse => true,
+              mode => 0755
+            }->
 	file_line  { 'odc_config_1':
 			line => "username=${username}",
 			path => '/home/osdatacollector/odc.conf'
@@ -53,31 +59,26 @@ class odc (
 			path => '/home/osdatacollector/odc.conf'
             }->
 	file_line  { 'odc_config_5':
-			line => "token=${token}",
-			path => '/home/osdatacollector/odc.conf'
-            }->
-	file_line  { 'odc_config_6':
 			line => "regionName=${region_name}",
 			path => '/home/osdatacollector/odc.conf'
             }->
-	file_line  { 'odc_config_7':
+	file_line  { 'odc_config_6':
 			line => "regionId=${region_id}",
 			path => '/home/osdatacollector/odc.conf'
             }->
-	file_line  { 'odc_config_8':
+	file_line  { 'odc_config_7':
 			line => "location=${location}",
 			path => '/home/osdatacollector/odc.conf'
             }->
-	file_line  { 'odc_config_9':
+	file_line  { 'odc_config_8':
 			line => "latitude=${latitude}",
 			path => '/home/osdatacollector/odc.conf'
             }->
-	file_line  { 'odc_config_10':
+	file_line  { 'odc_config_9':
 			line => "agentUrl=${agent_url}",
 			path => '/home/osdatacollector/odc.conf'
             }->
-	exec { "run_osd":
-   	      command => "/usr/bin/python /home/osdatacollector/openstackDataCollector.py &",
-   	      path    => "/usr/local/bin/:/bin/:/usr/bin/python",
+	service { "openstackDataCollector":
+ 	 		ensure => "running",
 	}
 }
