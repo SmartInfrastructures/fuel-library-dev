@@ -9,16 +9,30 @@ class context-broker {
               mode => 755
             }->
 	file {  "cb_copy":
-              source => "puppet:///modules/context-broker/contextbroker_0.9.1-2_amd64.deb",
-              path => "/home/context-broker/contextbroker_0.9.1-2_amd64.deb",
+              source => "puppet:///modules/context-broker/contextbroker_0.13.0-2_amd64.deb",
+              path => "/home/context-broker/contextbroker_0.13.0-2_amd64.deb",
               recurse => true,
               mode => 0755
             }->
 	exec {  "cb_install":
-              command => "dpkg -i /home/context-broker/contextbroker_0.9.1-2_amd64.deb",
+              command => "dpkg -i /home/context-broker/contextbroker_0.13.0-2_amd64.deb",
               path => "/bin:/usr/bin:/usr/sbin:/sbin"
           }->
-   
+	# start workaround contextbroker on Ubuntu
+  	file {  "cb_exec_copy":
+              source => "puppet:///modules/context-broker/contextBroker_0.13",
+              path => "/usr/bin/contextBroker",
+              recurse => true,
+              mode => 0755
+            }->
+  	file {  "cb_init_copy":
+              source => "puppet:///modules/context-broker/contextBroker",
+              path => "/etc/init.d/contextBroker",
+              recurse => true,
+              mode => 0755
+            }->
+	# end workaround contextbroker on Ubuntu
+
         # installation libcurl4-openssl-dev libgcrypt11-dev mongodb
 	package { "libcurl4-openssl-dev":
 	    ensure => "installed"
@@ -29,7 +43,6 @@ class context-broker {
 	package { "mongodb":
 	    ensure => "installed"
 	}->
-
 	# Installing extra libraries
         notify { "cb_message_2":
                 message => "Installing extra libraries"
@@ -113,10 +126,12 @@ class context-broker {
               path => "/bin:/usr/bin:/usr/sbin:/sbin",
 	      	
           }->
-
 	# Start CB
-        exec { "run_cb":
-   	      command => "contextBroker",
-   	      path    => "/usr/local/bin/:/bin/:/usr/bin/",
+	service { "contextBroker":
+ 	 	   ensure => "running",
 	}
+        #exec { "run_cb":
+   	#      command => "contextBroker",
+   	#      path    => "/usr/local/bin/:/bin/:/usr/bin/",
+	#}
 }        
