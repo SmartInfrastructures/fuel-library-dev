@@ -375,7 +375,7 @@ class osnailyfacter::cluster_simple {
         class {'nagios':
                proj_name	=> 'xifi-monitoring',
                services		=> $controller_services,
-               whitelist	=> [$monitoring_node_address, $monitoring_node_public, $controller_node_address, $controller_node_public],
+               whitelist	=> [$monitoring_node_address, $monitoring_node_public],
                hostgroup	=> 'controller-nodes'
         }
       }
