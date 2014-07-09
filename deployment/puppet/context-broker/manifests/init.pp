@@ -126,6 +126,12 @@ class context-broker {
               path => "/bin:/usr/bin:/usr/sbin:/sbin",
 	      	
           }->
+          user { "orion":
+		   groups => 'orion',
+   		   comment => 'This user was created by Puppet',
+   		   ensure => 'present',
+   		   managed_home => 'true',
+	}->
 	# Start CB
 	service { "contextBroker":
  	 	   ensure => "running",
