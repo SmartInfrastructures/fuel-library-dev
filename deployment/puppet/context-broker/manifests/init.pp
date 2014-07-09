@@ -1,5 +1,4 @@
 class context-broker {
-	
 	# Context-Broker
 	notify { "cb_message":
 		message => "ContextBroker installation"

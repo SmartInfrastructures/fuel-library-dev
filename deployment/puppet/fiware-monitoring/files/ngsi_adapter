@@ -1,0 +1,120 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          ngsi_adapter
+# Required-Start:    $local_fs $remote_fs $network $syslog
+# Required-Stop:     $local_fs $remote_fs $network $syslog
+# Default-Start:     3 4 5
+# Default-Stop:      0 1 2 6
+# Short-Description: Init script for starting up NGSI Adapter service
+# Description:       NGSI Adapter is a generic component to transform monitoring
+#                    data from probes to NGSI context attributes, and forward
+#                    them through a NGSI Context Broker.
+### END INIT INFO
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+DESC="NGSI Adapter Service"
+NAME=ngsi_adapter
+DAEMON=/home/fiware-monitoring/NGSI/adapter
+DAEMON_ARGS=""
+DAEMON_USER=fiware
+PIDFILE=/var/run/$NAME.pid
+SCRIPTNAME=/etc/init.d/$NAME
+
+# Exit if the component is not installed
+[ -x "$DAEMON" ] || exit 0
+
+# Read configuration variable files, if present
+[ -r /etc/profile ]	  && . /etc/profile
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+# Load the VERBOSE setting and other rcS variables
+. /lib/init/vars.sh
+
+# Define LSB log_* functions.
+# Depend on lsb-base (>= 3.2-14) to ensure that this file is present
+# and status_of_proc is working.
+. /lib/lsb/init-functions
+
+# Function that checks configuration
+do_checkup()
+{
+	local euid=$(id -u)
+	local user=${DAEMON_USER:-none}
+	# check privileges
+	[ $euid -eq 0 ] || { log_failure_msg "Must be superuser to do that action"; return 1; }
+	# check DAEMON_USER
+	id $user >/dev/null 2>&1 || { log_failure_msg "User $DAEMON_USER not found"; return 1; }
+	# check Node.js V8 engine
+	[ -n "$(node -v 2>/dev/null)" ] || { log_failure_msg "Node engine not found"; return 1; }
+}
+
+# Function that starts the daemon/service
+do_start()
+{
+	# Return
+	#   0 if daemon has been started
+	#   1 if daemon was already running
+	#   2 if daemon could not be started
+	do_checkup || return 2
+	start-stop-daemon --start --quiet --pidfile $PIDFILE \
+		--startas $DAEMON --test > /dev/null \
+		|| return 1
+	start-stop-daemon --start --quiet --pidfile $PIDFILE --make-pidfile \
+		--background --chuid $DAEMON_USER \
+		--startas $DAEMON -- $DAEMON_ARGS \
+		|| return 2
+}
+
+# Function that stops the daemon/service
+do_stop()
+{
+	# Return
+	#   0 if daemon has been stopped
+	#   1 if daemon was already stopped
+	#   2 if daemon could not be stopped
+	#   other if a failure occurred
+	do_checkup || return 2
+	start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE
+	RETVAL="$?"
+	[ "$RETVAL" = 2 ] && return 2
+	# Wait for children to finish too if this is a daemon that forks
+	# and if the daemon is only ever run from this initscript.
+	# If the above conditions are not satisfied then add some other code
+	# that waits for the process to drop all resources that could be
+	# needed by services started subsequently.  A last resort is to
+	# sleep for some time.
+	start-stop-daemon --stop --quiet --oknodo --retry=0/30/KILL/5 --exec $DAEMON
+	[ "$?" = 2 ] && return 2
+	# Many daemons don't delete their pidfiles when they exit.
+	rm -f $PIDFILE
+	return "$RETVAL"
+}
+
+case "$1" in
+	start)
+		[ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC" "$NAME"
+		do_start
+		case "$?" in
+			0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+			2)   [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+		esac
+		;;
+	stop)
+		[ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
+		do_stop
+		case "$?" in
+			0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+			2)   [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+		esac
+		;;
+	status)
+		status_of_proc -p"$PIDFILE" "$DAEMON" "$NAME" && exit 0 || exit $?
+		;;
+	*)
+		echo "Usage: $SCRIPTNAME {start|stop|status}" >&2
+		exit 3
+		;;
+esac
+
+:
