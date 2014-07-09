@@ -126,18 +126,17 @@ class context-broker {
               path => "/bin:/usr/bin:/usr/sbin:/sbin",
 	      	
           }->
-          user { "orion":
-		   groups => 'orion',
-   		   comment => 'This user was created by Puppet',
-   		   ensure => 'present',
-   		   managed_home => 'true',
+        group { "orion_group":
+          	   name => "orion",
+          	   ensure => "present",
+          }->
+        #workaround add user on Ubuntu
+        exec { "orion_user":
+		   command => "/usr/sbin/useradd -g orion -m orion",
+		   path => "/usr/sbin"
 	}->
 	# Start CB
 	service { "contextBroker":
  	 	   ensure => "running",
 	}
-        #exec { "run_cb":
-   	#      command => "contextBroker",
-   	#      path    => "/usr/local/bin/:/bin/:/usr/bin/",
-	#}
 }        
