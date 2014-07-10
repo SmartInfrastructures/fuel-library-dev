@@ -6,7 +6,6 @@ class nagios::params {
     'libvirt' => 'check_nrpe_1arg!check_libvirt',
     'quantum-api' => 'check_http_api!9696',
     'quantum' => 'check_nrpe_1arg!check_quantum',
-    'ovswitch_server' => 'check_nrpe_1arg!check_ovswitch_server',
     'swift-proxy' => 'check_nrpe_1arg!check_swift_proxy',
     'swift-account' => 'check_nrpe_1arg!check_swift_account',
     'swift-container' => 'check_nrpe_1arg!check_swift_container',
