@@ -45,6 +45,13 @@
 
 PARAM=$1
 NAME=contextBroker
+FOLDER=/var/log/contextBroker
+
+if [ ! -d ${FOLDER} ]; then
+ mkdir -p $FOLDER
+ chmod -R 777 $FOLDER
+ chown -R orion:orion $FOLDER
+fi 
 
 # Load the environment
 if [ -f /etc/sysconfig/${NAME} ]; then
