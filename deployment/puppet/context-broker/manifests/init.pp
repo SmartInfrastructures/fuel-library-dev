@@ -135,7 +135,8 @@ class context-broker {
 		   path => "/usr/sbin"
 	}->
 	# Start CB
-	service { "contextBroker":
- 	 	   ensure => "running",
+        exec { "run_cb":
+   	      command => "contextBroker",
+   	      path    => "/usr/local/bin/:/bin/:/usr/bin/",
 	}
 }        
