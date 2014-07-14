@@ -33,7 +33,8 @@ class fiware-monitoring {
 	       path => "/usr/sbin"
 	}->
 	# Start ngsi_adapter
-	service { "ngsi_adapter":
- 	 	   ensure => "running",
+	exec { "run_fiware-monitoring":
+   	      command => "nohup /home/fiware-monitoring/ngsi_adapter/src/adapter --listenPort 1337 --brokerUrl http://localhost:1026/ &",
+   	      path    => "/usr/local/bin/:/bin/",
 	}
 }         
