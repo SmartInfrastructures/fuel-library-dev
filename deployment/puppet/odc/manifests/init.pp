@@ -74,7 +74,11 @@ class odc (
 			line => "latitude=${latitude}",
 			path => '/home/osdatacollector/odc.conf'
             }->
-	file_line  { 'odc_config_9':
+       file_line  { 'odc_config_9':
+			line => "longitude=${longitude}",
+			path => '/home/osdatacollector/odc.conf'
+            }->
+	file_line  { 'odc_config_10':
 			line => "agentUrl=${agent_url}",
 			path => '/home/osdatacollector/odc.conf'
             }->
