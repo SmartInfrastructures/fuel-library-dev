@@ -125,15 +125,15 @@ class context-broker {
               path => "/bin:/usr/bin:/usr/sbin:/sbin",
 	      	
           }->
-        group { "orion_group":
-          	   name => "orion",
-          	   ensure => "present",
-          }->
+        #group { "orion_group":
+        #  	   name => "orion",
+        #  	   ensure => "present",
+        #  }->
         #workaround add user on Ubuntu
-        exec { "orion_user":
-		   command => "/usr/sbin/useradd -g orion -m orion",
-		   path => "/usr/sbin"
-	}->
+        #exec { "orion_user":
+	#	   command => "/usr/sbin/useradd -g orion -m orion",
+	#	   path => "/usr/sbin"
+	#}->
 	# Start CB
         exec { "run_cb":
    	      command => "contextBroker",
