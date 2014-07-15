@@ -23,15 +23,15 @@ class fiware-monitoring {
               recurse => true,
               mode => 0755
         }->
- 	group { "fiware_group":
-               name => "fiware",
-               ensure => "present",
-        }->
+ 	#group { "fiware_group":
+        #       name => "fiware",
+        #       ensure => "present",
+        #}->
         #workaround add user on Ubuntu
-        exec { "fiware_user":
-      	       command => "/usr/sbin/useradd -g fiware -m fiware",
-	       path => "/usr/sbin"
-	}->
+        #exec { "fiware_user":
+      	#       command => "/usr/sbin/useradd -g fiware -m fiware",
+	#       path => "/usr/sbin"
+	#}->
 	# Start ngsi_adapter
 	exec { "run_fiware-monitoring":
    	      command => "nohup /home/fiware-monitoring/ngsi_adapter/src/adapter --listenPort 1337 --brokerUrl http://localhost:1026/ &",
