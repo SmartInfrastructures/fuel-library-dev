@@ -50,8 +50,7 @@ FOLDER=/var/log/contextBroker
 if [ ! -d ${FOLDER} ]; then
  mkdir -p $FOLDER
  chmod -R 777 $FOLDER
- chown -R root:root $FOLDER
- touch ${FOLDER}/contextBroker.pid
+ chown -R orion:orion $FOLDER
 fi 
 
 # Load the environment
