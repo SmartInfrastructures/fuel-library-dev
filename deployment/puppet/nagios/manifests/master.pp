@@ -144,14 +144,14 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
     file        { "script_copy_fix":
               	      source => "puppet:///modules/nagios/fix_and_run.sh",
                       path => "/etc/${masterdir}/${master_proj_name}/fix_and_run.sh",
-             	      recurse => true,
-              	      mode => 0755
+            	      recurse => true,
+             	      mode => 0755
             	}
-    exec        { "script_fix_and_run":
-        	      path => "/usr/bin:/usr/sbin:/bin:/sbin",
-        	      command => "sh /etc/${masterdir}/${master_proj_name}/fix_and_run.sh", 
-	              onlyif => "test -f /etc/${masterdir}/${master_proj_name}/fix_and_run.sh",
-           	}
+    #exec        { "script_fix_and_run":
+    #   	      path => "/usr/bin:/usr/sbin:/bin:/sbin",
+    #    	      command => "sh /etc/${masterdir}/${master_proj_name}/fix_and_run.sh", 
+    #	              onlyif => "test -f /etc/${masterdir}/${master_proj_name}/fix_and_run.sh",
+    #       	}
 
   cron { puppet-agent:
     command => "puppet agent --onetime --tags=nagios",
