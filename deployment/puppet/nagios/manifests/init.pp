@@ -22,7 +22,7 @@ $nrpeservice       = $nagios::params::nrpeservice,
       $basic_services = ['yum','kernel','libs','load','procs','zombie','swap','user','cpu','memory']   
     }
     'Debian': {
-      $basic_services = ['load','procs','zombie','swap','user','cpu','memory']
+      $basic_services = ['procs','zombie','swap','user','cpu-load','memory']
       
       #temp - we will fix	the iso	;)
       apt::source { 'precise_nagios':
