@@ -31,7 +31,7 @@ class nagios::params {
     'yum' => 'nrpe_check_yum',
     'kernel' => 'nrpe_check_kernel',
     'libs' => 'nrpe_check_libs',
-    'cpu-load' => 'nrpe_check_load!15.0!10.0!5.0!30.0!25.0!20.0',
+    'load' => 'nrpe_check_load!15.0!10.0!5.0!30.0!25.0!20.0',
     'procs' => 'nrpe_check_procs!250!400',
     'zombie' => 'nrpe_check_procs_zombie!5!10',
     'swap' => 'nrpe_check_swap!20%!10%',
