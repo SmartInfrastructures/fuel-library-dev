@@ -3,6 +3,9 @@ class context-broker {
 	notify { "cb_message":
 		message => "ContextBroker installation"
 	}
+	
+	group { "orion": ensure => "present"}
+	
  	file {  "/home/context-broker/":
               ensure => "directory",
               mode => 755
@@ -126,7 +129,6 @@ class context-broker {
 	      	
           }->
           service {"contextBroker":
-          	ensure => "running",
           	enable => "true",
           }
        
