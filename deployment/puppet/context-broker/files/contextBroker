@@ -47,10 +47,17 @@ PARAM=$1
 NAME=contextBroker
 FOLDER=/var/log/contextBroker
 
+if id -u 'orion' >/dev/null 2>&1; then
+ echo "the user orioin already exists"
+else
+ useradd -g orion orion
+fi
+
 if [ ! -d ${FOLDER} ]; then
  mkdir -p $FOLDER
  chmod -R 777 $FOLDER
  chown -R orion:orion $FOLDER
+ touch /var/log/contextBroker/contextBroker.pid
 fi 
 
 # Load the environment
