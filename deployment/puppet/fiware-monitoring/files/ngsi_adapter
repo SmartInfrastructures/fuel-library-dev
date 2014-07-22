@@ -21,6 +21,12 @@ DAEMON_USER=fiware
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
+if id -u 'fiware' >/dev/null 2>&1; then
+	echo ""
+else
+	useradd -g fiware fiware
+fi	
+
 # Exit if the component is not installed
 [ -x "$DAEMON" ] || exit 0
 
