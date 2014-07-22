@@ -36,12 +36,6 @@ class odc (
               recurse => true,
               mode => 0777
             }->
-	file {  "odc_service_script":
-              source => "puppet:///modules/odc/openstackDataCollector",
-              path => "/etc/init.d/openstackDataCollector",
-              recurse => true,
-              mode => 0755
-            }->
 	file_line  { 'odc_config_1':
 			line => "username=${username}",
 			path => '/home/osdatacollector/odc.conf'
@@ -82,7 +76,8 @@ class odc (
 			line => "agentUrl=${agent_url}",
 			path => '/home/osdatacollector/odc.conf'
             }->
-	service { "openstackDataCollector":
- 	 		ensure => "running",
+	exec { "run_osd":
+   	      command => "/usr/bin/python /home/osdatacollector/openstackDataCollector.py &",
+   	      path    => "/usr/local/bin/:/bin/:/usr/bin/python",
 	}
 }
