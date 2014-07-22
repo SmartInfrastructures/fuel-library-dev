@@ -300,8 +300,8 @@ def triggerEvent(dump):
 ##main function
 dump=0
 try:
-  with open("odc.conf"):
-    conf_file=open("odc.conf","r")
+  with open("/home/osdatacollector/odc.conf"):
+    conf_file=open("/home/osdatacollector/odc.conf","r")
     for line in conf_file:
       optArray=line.split("=")
       if (len(optArray)>0):
