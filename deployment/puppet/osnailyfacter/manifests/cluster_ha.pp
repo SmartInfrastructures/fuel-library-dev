@@ -1,3 +1,4 @@
+
 class osnailyfacter::cluster_ha {
 
   ##PARAMETERS DERIVED FROM YAML FILE
@@ -13,7 +14,7 @@ class osnailyfacter::cluster_ha {
     $vlan_start           = $novanetwork_params['vlan_start']
   }
 
-  if $cinder_nodes {
+ if $cinder_nodes {
     $cinder_nodes_array   = $::fuel_settings['cinder_nodes']
   }
   else {
@@ -135,6 +136,15 @@ class osnailyfacter::cluster_ha {
   $controller_node_public  = $::fuel_settings['public_vip']
   $controller_node_address = $::fuel_settings['management_vip']
   $mountpoints = filter_hash($mp_hash,'point')
+  $monitoring = filter_nodes($nodes_hash,'role','monitoring')
+
+  if (!empty($monitoring)) {
+     $monitoring_node_address = $monitoring[0]['internal_address']
+     $monitoring_node_public = $monitoring[0]['public_address']
+    } else {
+     $monitoring_node_public = '127.0.0.1'
+     $monitoring_node_address = '127.0.0.1'	
+  } 
 
   $cinder_iscsi_bind_addr = $::storage_address
 
@@ -292,6 +302,18 @@ class osnailyfacter::cluster_ha {
       use_unicast_corosync          => $::fuel_settings['use_unicast_corosync'],
       nameservers                   => $::dns_nameservers,
     }
+
+ # for completeness we should include "rabbit" and "mysql" but there are some issues with the nrpe to be explored
+        $basic_services = ['keystone', 'nova-scheduler', 'cinder-scheduler','memcached','nova-api','cinder-api','glance-api','glance-             registry','horizon']
+
+        $network_services = $::use_quantum ? {
+          true  => ['quantum-api'],
+          false => [],
+          default => []
+        }
+ 
+      	$controller_services = concat($basic_services,$network_services)
+
   if $::fuel_settings['role'] == 'primary-controller' {
      if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.pivot_scheduler.PivotScheduler' ) {
         include dcrm
@@ -305,21 +327,33 @@ class osnailyfacter::cluster_ha {
       
       # OpenStack Data Collector      
 
-	    if $monitoring_hash['use_openstack_data_collector'] {
-	            class {'odc':
-	                    username        =>      'nova',
-	                    password        =>      $nova_hash[user_password],
-	                    tenant_name     =>      'services',
-	                    auth_url        =>      '127.0.0.1:35357/v2.0',
-	                    token           =>      $keystone_hash[admin_token],
-	                    region_name     =>      $federation_hash[region_name],
-	                    region_id       =>      $federation_hash[region_id],
-	                    location        =>      $federation_hash[country],
-	                    latitude        =>      $federation_hash[latitude],
-	                    longitude       =>      $federation_hash[longitude],
-	                    agent_url       =>      $monitoring_hash[monitoring_node_url],
-	             }
-	    } # end primary-controller
+  if $monitoring_hash['use_openstack_data_collector'] {
+	  class {'odc':
+	              username        =>      'nova',
+	              password        =>      $nova_hash[user_password],
+	              tenant_name     =>      'services',
+	              auth_url        =>      '127.0.0.1:35357/v2.0',
+	              token           =>      $keystone_hash[admin_token],
+	              region_name     =>      $federation_hash[region_name],
+	              region_id       =>      $federation_hash[region_id],
+	              location        =>      $federation_hash[country],
+	              latitude        =>      $federation_hash[latitude],
+	              longitude       =>      $federation_hash[longitude],
+	             agent_url       =>      $monitoring_hash[monitoring_node_url],
+            }
+   } 
+
+    if $monitoring_hash['use_nagios'] {
+       	
+        class {'nagios':
+               proj_name	=> 'xifi-monitoring',
+               services		=> $controller_services,
+               whitelist	=> [$monitoring_node_address, $monitoring_node_public],
+               hostgroup	=> 'controller-nodes'
+        }
+     }
+
+# end primary-controller
   } else { # if it is a secondary controller
     if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.pivot_scheduler.PivotScheduler' ) {
         include dcrm
@@ -330,17 +364,25 @@ class osnailyfacter::cluster_ha {
         include dcrm
         include dcrm::ha_controller_secondary_pulsar
       }
+	
+    if $monitoring_hash['use_nagios'] {
+       	
+       class {'nagios':
+               proj_name	=> 'xifi-monitoring',
+               services		=> $controller_services,
+              whitelist	=> [$monitoring_node_address, $monitoring_node_public],
+              hostgroup	=> 'sec-controller-nodes'
+       }
+     }
+
   }
  }
-
 
   class virtual_ips () {
     cluster::virtual_ips { $vip_keys:
       vips => $vips,
     }
   }
-
-
 
   case $::fuel_settings['role'] {
     /controller/ : {
@@ -531,6 +573,24 @@ class osnailyfacter::cluster_ha {
           Class['openstack::compute'] -> Class['ceph']
         }
 
+    if $monitoring_hash['use_nagios'] {
+
+        $basic_services = ['nova-compute','nova-network','libvirt']
+	$network_services = $::use_quantum ? {
+	       true  => ['quantum','ovswitch','ovswitch_server'],
+               false => ['nova-network'],
+               default => ['nova-network']
+	      }
+ 
+      #  $compute_services = concat($basic_services,$network_services)
+        class {'nagios':
+               proj_name        => 'xifi-monitoring',
+               services         =>  $basic_services,
+               whitelist        => [$monitoring_node_address, $monitoring_node_public],
+               hostgroup        => 'compute-nodes'
+        }
+      }
+
 #      class { "::rsyslog::client":
 #        log_local => true,
 #        log_auth_local => true,
@@ -546,6 +606,26 @@ class osnailyfacter::cluster_ha {
  #ADDONS XIFI START
    "monitoring" : {
     include nodejs
+
+    if $monitoring_hash['use_nagios'] {
+	     class {'nagios::master':
+		      proj_name       => 'xifi-monitoring',
+		      rabbitmq        => true,
+		      nginx           => false,
+		      mysql_user      => 'root',
+		      mysql_pass      => $mysql_hash[root_password],
+		      mysql_port      => '3307',
+		      rabbit_pass   	=> $rabbit_hash['password'],
+		      rabbit_user     => $rabbit_hash['user'],
+		      rabbit_port     => '5673',
+		      templatehost    => {'name' => 'default-host', 'check_interval' => $monitoring_hash['nagios_host_check_interval']},
+		      templateservice => {'name' => 'default-service', 'check_interval'=> $monitoring_hash['nagios_service_check_interval']},
+        	      htpasswd        => {'nagiosadmin' => $monitoring_hash['nagios_admin_pwd']},
+                      hostgroups      => ['compute-nodes', 'controller-nodes', 'swift-storage', 'swift-proxy'],
+	              contactgroups   => {'group' => 'admins', 'alias' => 'Admins'},
+	              contacts        => {'email' => $monitoring_hash['nagios_mail_alert']}
+	     }        
+      }
   
    # Context-Broker
     if $monitoring_hash['use_context_broker'] {
@@ -594,11 +674,23 @@ class osnailyfacter::cluster_ha {
         verbose              => $verbose ? { 'true' => true, true => true, default => false },
         use_syslog           => $::fuel_settings['use_syslog'] ? { 'false'=>false, false=>false, default=>true },
       }
-#      class { "::rsyslog::client":
+#class { "::rsyslog::client":
 #        log_local => true,
 #        log_auth_local => true,
 #        rservers => $rservers,
 #      }
+
+     #ADDONS XIFI START
+      if $monitoring_hash['use_nagios'] {
+        class {'nagios':
+               proj_name        => 'xifi-monitoring',
+               services         => ['cinder-volume'],
+               whitelist        => [$monitoring_node_address, $monitoring_node_public],
+               hostgroup        => 'volume-nodes'
+        }
+      }
+      #ADDONS XIFI END
+
     } # CINDER ENDS
 
     "ceph-osd" : {
