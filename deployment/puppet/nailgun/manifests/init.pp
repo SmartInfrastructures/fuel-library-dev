@@ -96,6 +96,8 @@ class nailgun(
     before => [
                Class["nailgun::nginx-repo"],
                Class["nailgun::nginx-nailgun"],
+               Class["nailgun::pm"],
+               Class["nailgun::puppetdb"]
                ],
   }
   class {openstack::logging:
@@ -265,7 +267,8 @@ class nailgun(
     mco_vhost       => $mco_vhost,
   }
 
-  class { "nailgun::nginx-service": }
+  class { "nailgun::nginx-service": } ->
+  class { "nailgun::puppetdb": }
 
   class { "nailgun::logrotate": }
 
@@ -277,4 +280,35 @@ class nailgun(
   }
 
   class { "nailgun::puppetsync": }
+  class { "nailgun::gateone":
+    pip_opts => "${pip_index} ${pip_find_links}",
+  }
+
+  nailgun::sshkeygen { "/root/.ssh/id_rsa":
+    homedir => "/root",
+    username => "root",
+    groupname => "root",
+    keytype => "rsa",
+  } ->
+
+  exec { "cp /root/.ssh/id_rsa.pub /etc/cobbler/authorized_keys":
+    command => "cp /root/.ssh/id_rsa.pub /etc/cobbler/authorized_keys",
+    creates => "/etc/cobbler/authorized_keys",
+    require => Class["nailgun::cobbler"],
+  }
+
+  file { "/etc/ssh/sshd_config":
+    content => template("nailgun/sshd_config.erb"),
+    owner => root,
+    group => root,
+    mode => 0600,
+  }
+
+  file { "/root/.ssh/config":
+    content => template("nailgun/root_ssh_config.erb"),
+    owner => root,
+    group => root,
+    mode => 0600,
+  }
+
 }

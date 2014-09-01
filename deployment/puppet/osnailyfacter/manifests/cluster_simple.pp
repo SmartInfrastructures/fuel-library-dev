@@ -16,6 +16,13 @@ class osnailyfacter::cluster_simple {
     }
   }
 
+  #XIFI ADD ON
+  if !$::fuel_settings['monitoring'] {
+    $monitoring_hash = {}
+  } else {
+    $monitoring_hash = $::fuel_settings['monitoring']
+  } 
+
   if $fuel_settings['cinder_nodes'] {
      $cinder_nodes_array   = $::fuel_settings['cinder_nodes']
   } else {
@@ -86,6 +93,11 @@ class osnailyfacter::cluster_simple {
   $access_hash          = $::fuel_settings['access']
   $nodes_hash           = $::fuel_settings['nodes']
   $network_manager      = "nova.network.manager.${novanetwork_params['network_manager']}"
+  if !$::fuel_settings['federation'] {
+     $federation_hash = {}
+  } else {
+     $federation_hash = $::fuel_settings['federation']
+  }
 
   if !$rabbit_hash[user] {
     $rabbit_hash[user] = 'nova'
@@ -96,6 +108,8 @@ class osnailyfacter::cluster_simple {
   $controller_node_address = $controller[0]['internal_address']
   $controller_node_public = $controller[0]['public_address']
   $roles = node_roles($nodes_hash, $::fuel_settings['uid'])
+ 
+  $monitoring = filter_nodes($nodes_hash,'role','monitoring')
 
   # AMQP client configuration
   $amqp_port = '5672'
@@ -112,6 +126,33 @@ class osnailyfacter::cluster_simple {
   $max_overflow = min($::processorcount * 5 + 0, 60 + 0)
   $max_retries = '-1'
   $idle_timeout = '3600'
+
+  if $monitoring {
+    $monitoring_node_address = $monitoring[0]['internal_address']
+  } else {
+    $monitoring_node_address = '127.0.0.1'  
+  }
+ if $monitoring {
+     $monitoring_node_public = $monitoring[0]['public_address']
+    } else {
+  $monitoring_node_public = '127.0.0.1'
+ }
+
+  if ($::fuel_settings['cinder']) {
+    if (member($cinder_nodes_array,'all')) {
+      $is_cinder_node = true
+    } elsif (member($cinder_nodes_array,$::hostname)) {
+      $is_cinder_node = true
+    } elsif (member($cinder_nodes_array,$internal_address)) {
+      $is_cinder_node = true
+    } elsif ($node[0]['role'] =~ /controller/ ) {
+      $is_cinder_node = member($cinder_nodes_array,'controller')
+    } else {
+      $is_cinder_node = member($cinder_nodes_array,$node[0]['role'])
+    }
+  } else {
+    $is_cinder_node = false
+  }
 
 
   $cinder_iscsi_bind_addr = $::storage_address
@@ -425,6 +466,57 @@ class osnailyfacter::cluster_simple {
       }
       #ADDONS END
 
+      #ADDONS XIFI START
+
+      if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.pivot_scheduler.PivotScheduler' ) {
+        include dcrm
+        include dcrm::controller
+      }
+      
+      if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.filter_scheduler.FilterScheduler.Pulsar' ) {
+        include dcrm
+        include dcrm::controller_pulsar
+      }
+
+      # OpenStack Data Collector      
+
+	    if $monitoring_hash['use_openstack_data_collector'] {
+	            class {'odc':
+	                    username        =>      'nova',
+	                    password        =>      $nova_hash[user_password],
+	                    tenant_name     =>      'services',
+	                    auth_url        =>      '127.0.0.1:35357/v2.0',
+	                    token           =>      $keystone_hash[admin_token],
+	                    region_name     =>      $federation_hash[region_name],
+	                    region_id       =>      $federation_hash[region_id],
+	                    location        =>      $federation_hash[country],
+	                    latitude        =>      $federation_hash[latitude],
+	                    longitude       =>      $federation_hash[longitude],
+	                    agent_url       =>      $monitoring_hash[monitoring_node_url],
+	             }
+	    }
+
+      if $monitoring_hash['use_nagios'] {
+
+        # for completeness we should include "rabbit" and "mysql" but there are some issues with the nrpe to be explored
+        $basic_services = ['keystone', 'nova-scheduler', 'cinder-scheduler','memcached','nova-api','cinder-api','glance-api','glance-registry','horizon']
+
+        $network_services = $::use_quantum ? {
+          true  => ['quantum-api'],
+          false => [],
+          default => []
+        }
+ 
+      	$controller_services = concat($basic_services,$network_services)
+
+        class {'nagios':
+               proj_name	=> 'xifi-monitoring',
+               services		=> $controller_services,
+               whitelist	=> [$monitoring_node_address, $monitoring_node_public],
+               hostgroup	=> 'controller-nodes'
+        }
+      }
+      #ADDONS XIFI END
     }
 
     "compute" : {
@@ -504,6 +596,38 @@ class osnailyfacter::cluster_simple {
         }
       }
 
+      #ADDONS XIFI START
+
+      if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.pivot_scheduler.PivotScheduler' ) {
+        include dcrm
+        include dcrm::compute
+      }  
+
+      if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.filter_scheduler.FilterScheduler.Pulsar' ) {
+        include dcrm
+        include dcrm::compute_pulsar
+      }
+
+      if $monitoring_hash['use_nagios'] {
+
+        $basic_services = ['nova-compute','libvirt']
+	      $network_services = $::use_quantum ? {
+	        true  => ['quantum','ovswitch','ovswitch_server'],
+                false => ['nova-network'],
+                default => ['nova-network']
+	      }
+ 
+        $compute_services = concat($basic_services,$network_services)
+        class {'nagios':
+               proj_name        => 'xifi-monitoring',
+               services         => $compute_services,
+               whitelist        => [$monitoring_node_address, $monitoring_node_public, $controller_node_address, $controller_node_public],
+               hostgroup        => 'compute-nodes'
+        }
+      }
+
+      #ADDONS XIFI END
+
     } # COMPUTE ENDS
 
     "mongo" : {
@@ -532,6 +656,45 @@ class osnailyfacter::cluster_simple {
 #        ceilometer_db_password      => $ceilometer_hash['db_password'],
 #      }
 #    } # MONGO ENDS
+   
+   #ADDONS XIFI START
+   "monitoring" : {
+   
+    include nodejs
+    
+    if $monitoring_hash['use_nagios'] {
+        # for completeness we should include "rabbit" and "mysql" but there are some issues with the nrpe to be explored
+	      class {'nagios::master':
+		      proj_name       => 'xifi-monitoring',
+		      rabbitmq        => true,
+		      nginx           => false,
+		      mysql_user      => 'root',
+		      mysql_pass      => $mysql_hash[root_password],
+		      mysql_port      => '3307',
+		      rabbit_pass   	=> $rabbit_hash['password'],
+		      rabbit_user     => $rabbit_hash['user'],
+		      rabbit_port     => '5673',
+		      templatehost    => {'name' => 'default-host', 'check_interval' => $monitoring_hash['nagios_host_check_interval']},
+		      templateservice => {'name' => 'default-service', 'check_interval'=> $monitoring_hash['nagios_service_check_interval']},
+          htpasswd        => {'nagiosadmin' => $monitoring_hash['nagios_admin_pwd']},		     
+          contactgroups   => {'group' => 'admins', 'alias' => 'Admins'},
+		      contacts        => {'email' => $monitoring_hash['nagios_mail_alert']}
+	      }        
+      }
+    # Context-Broker
+    if $monitoring_hash['use_context_broker'] {
+      include context-broker
+    }
+	
+    # NGSI_Adapter - Fiware monitoring
+    if $monitoring_hash['use_ngsi_adapter'] {
+      include fiware-monitoring
+    }	
+
+    } # MONITORING ENDS
+    
+    #ADDONS XIFI END
+    
     "cinder" : {
       include keystone::python
       #FIXME(bogdando) notify services on python-amqp update, if needed
@@ -572,6 +735,18 @@ class osnailyfacter::cluster_simple {
         vmware_host_username => $vcenter_hash['vc_user'],
         vmware_host_password => $vcenter_hash['vc_password']
       }
+
+      #ADDONS XIFI START
+      if $monitoring_hash['use_nagios'] {
+        class {'nagios':
+               proj_name        => 'xifi-monitoring',
+               services         => ['cinder-volume'],
+               whitelist        => [$monitoring_node_address, $monitoring_node_public, $controller_node_address, $controller_node_public],
+               hostgroup        => 'volume-nodes'
+        }
+      }
+      #ADDONS XIFI END
+     
     } #CINDER ENDS
 
     "ceph-osd" : {

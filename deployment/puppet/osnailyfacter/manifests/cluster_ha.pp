@@ -94,6 +94,18 @@ class osnailyfacter::cluster_ha {
   $mp_hash              = $::fuel_settings['mp']
   $network_manager      = "nova.network.manager.${novanetwork_params['network_manager']}"
 
+  if !$::fuel_settings['federation'] {
+     $federation_hash = {}
+  } else {
+     $federation_hash = $::fuel_settings['federation']
+  }
+ 
+   if !$::fuel_settings['monitoring'] {
+    $monitoring_hash = {}
+  } else {
+    $monitoring_hash = $::fuel_settings['monitoring']
+  } 
+
   if !$rabbit_hash['user'] {
     $rabbit_hash['user'] = 'nova'
   }
@@ -364,7 +376,46 @@ class osnailyfacter::cluster_ha {
       nova_report_interval           => $::nova_report_interval,
       nova_service_down_time         => $::nova_service_down_time,
     }
+  if $::fuel_settings['role'] == 'primary-controller' {
+     if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.pivot_scheduler.PivotScheduler' ) {
+        include dcrm
+        include dcrm::controller
+      }
+      
+      if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.filter_scheduler.FilterScheduler.Pulsar' ) {
+        include dcrm
+        include dcrm::controller_pulsar
+      }
+      
+      # OpenStack Data Collector      
+
+	    if $monitoring_hash['use_openstack_data_collector'] {
+	            class {'odc':
+	                    username        =>      'nova',
+	                    password        =>      $nova_hash[user_password],
+	                    tenant_name     =>      'services',
+	                    auth_url        =>      '127.0.0.1:35357/v2.0',
+	                    token           =>      $keystone_hash[admin_token],
+	                    region_name     =>      $federation_hash[region_name],
+	                    region_id       =>      $federation_hash[region_id],
+	                    location        =>      $federation_hash[country],
+	                    latitude        =>      $federation_hash[latitude],
+	                    longitude       =>      $federation_hash[longitude],
+	                    agent_url       =>      $monitoring_hash[monitoring_node_url],
+	             }
+	    } # end primary-controller
+  } else { # if it is a secondary controller
+    if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.pivot_scheduler.PivotScheduler' ) {
+        include dcrm
+        include dcrm::ha_controller_secondary
+      }
+      
+      if ( $::fuel_settings['compute_scheduler_driver'] == 'nova.scheduler.filter_scheduler.FilterScheduler.Pulsar' ) {
+        include dcrm
+        include dcrm::ha_controller_secondary_pulsar
+      }
   }
+ }
 
   class virtual_ips () {
     cluster::virtual_ips { $::osnailyfacter::cluster_ha::vip_keys:
@@ -740,6 +791,24 @@ class osnailyfacter::cluster_ha {
         verbose                     => $verbose,
       }
     } # PRIMARY-MONGO ENDS
+
+ #ADDONS XIFI START
+   "monitoring" : {
+    include nodejs
+  
+   # Context-Broker
+    if $monitoring_hash['use_context_broker'] {
+      include context-broker
+    }
+  
+   # NGSI_Adapter - Fiware monitoring
+    if $monitoring_hash['use_ngsi_adapter'] {
+      include fiware-monitoring
+    }	
+
+    } # MONITORING ENDS
+    
+    #ADDONS XIFI END
 
     "cinder" : {
       include keystone::python
