@@ -450,7 +450,7 @@ class osnailyfacter::cluster_simple {
 
         $basic_services = ['nova-compute','libvirt']
 	      $network_services = $::use_quantum ? {
-	        true  => ['quantum','ovswitch','ovswitch_server'],
+	        true  => ['quantum'],
                 false => ['nova-network'],
                 default => ['nova-network']
 	      }
