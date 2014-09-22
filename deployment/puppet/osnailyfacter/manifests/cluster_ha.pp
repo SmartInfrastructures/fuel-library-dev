@@ -577,7 +577,7 @@ class osnailyfacter::cluster_ha {
 
         $basic_services = ['nova-compute','nova-network','libvirt']
 	$network_services = $::use_quantum ? {
-	       true  => ['quantum','ovswitch','ovswitch_server'],
+	       true  => ['quantum'],
                false => ['nova-network'],
                default => ['nova-network']
 	      }
