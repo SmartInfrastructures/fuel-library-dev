@@ -6,9 +6,11 @@ $group   = false,
 
   $deployment_id = $::fuel_settings['deployment_id']
 
+  $rand = fqdn_rand(100)
+
   notify{ "**** called service ${name} tag deployment_${deployment_id} *****": }
 
-  @@nagios_service { "${deployment_id}_${::hostname}_${name}":
+  @@nagios_service { "${deployment_id}_${::hostname}_${name}-${rand}":
     ensure              => present,
     hostgroup_name      => $nagios::hostgroup,
     check_command       => $command,
