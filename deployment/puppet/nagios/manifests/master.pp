@@ -140,18 +140,47 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
     'nagios_servicegroup':;
   }
 
-    #TODO remove fix_and_run script in order to fix glance-registry service bug
-    file        { "script_copy_fix":
-              	      source => "puppet:///modules/nagios/fix_and_run.sh",
-                      path => "/etc/${masterdir}/${master_proj_name}/fix_and_run.sh",
-            	      recurse => true,
-             	      mode => 0755
-            	}
-    exec        { "script_fix_and_run":
-       	      path => "/usr/bin:/usr/sbin:/bin:/sbin",
-        	      command => "sh /etc/${masterdir}/${master_proj_name}/fix_and_run.sh", 
-    	              onlyif => "test -f /etc/${masterdir}/${master_proj_name}/fix_and_run.sh",
-           	}
+
+  $deployment_id = $::fuel_settings['deployment_id']
+
+  $tag = "deployment_${deployment_id}"
+
+  notify{ "**** importing host with tag ${tag} *****": }
+
+  Nagios_host <<|tag==$tag|>> {
+    notify  => Exec['fix-permissions'],
+    require => File["/etc/${masterdir}/${master_proj_name}"],
+  }
+
+  # The following sometimes still cause this error on puppet agent
+  # run:
+  #
+  #  err: Failed to apply catalog: Parameter alias failed:
+  #  5_node-18_compute-nodes-0 can not create alias Compute-nodes:
+  #  object already exists
+  #
+  # But omitting it will cause
+  #
+  # Error: Could not find any hostgroup matching 'compute-nodes'
+  # (config file '/etc/nagios3/xifi-monitoring_master/node-23_services.cfg',
+  #  starting on line 76)
+
+  Nagios_hostgroup <<|tag==$tag|>> {
+    notify  => Exec['fix-permissions'],
+    require => File["/etc/${masterdir}/${master_proj_name}"],
+  }->
+  #TODO remove fix_and_run script in order to fix glance-registry service bug
+  file { "script_copy_fix":
+    source => "puppet:///modules/nagios/fix_and_run.sh",
+    path => "/etc/${masterdir}/${master_proj_name}/fix_and_run.sh",
+    recurse => true,
+    mode => 0755
+  }->
+  exec { "script_fix_and_run":
+    path => "/usr/bin:/usr/sbin:/bin:/sbin",
+    command => "sh /etc/${masterdir}/${master_proj_name}/fix_and_run.sh",
+    onlyif => "test -f /etc/${masterdir}/${master_proj_name}/fix_and_run.sh",
+  }
 
   cron { puppet-agent:
     command => "puppet agent --onetime --tags=nagios",
