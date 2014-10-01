@@ -110,7 +110,7 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
 
   File {
       owner   => root,
-      group   => root,
+      group   => nagios,
       mode    => '0644',
       require => Package[$nagios3pkg],
   }
