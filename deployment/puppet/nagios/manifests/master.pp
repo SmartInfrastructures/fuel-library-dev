@@ -65,6 +65,8 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
 
   # Bug: 3299
     exec { 'fix-permissions':
+      # FIXME: Giving the read permission to others seems a bit too open...
+      #        Why not do a chown on the files?
       command     => "chmod -R go+r /etc/${masterdir}/${master_proj_name}",
       path        => ['/bin','/sbin','/usr/sbin/','/usr/sbin/'],
       refreshonly => true,
