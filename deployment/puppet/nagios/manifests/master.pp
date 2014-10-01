@@ -163,12 +163,16 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
   #
   # Error: Could not find any hostgroup matching 'compute-nodes'
   # (config file '/etc/nagios3/xifi-monitoring_master/node-23_services.cfg',
-  #  starting on line 76)
+  # starting on line 76)
 
-  Nagios_hostgroup <<|tag==$tag|>> {
-    notify  => Exec['fix-permissions'],
-    require => File["/etc/${masterdir}/${master_proj_name}"],
-  }->
+  # This is replaced by the static file hostgroups-fixed.cfg, so we
+  # should get rid of alias error
+
+  # Nagios_hostgroup <<|tag==$tag|>> {
+  #   notify  => Exec['fix-permissions'],
+  #   require => File["/etc/${masterdir}/${master_proj_name}"],
+  # }->
+
   #TODO remove fix_and_run script in order to fix glance-registry service bug
   file { "script_copy_fix":
     source => "puppet:///modules/nagios/fix_and_run.sh",
