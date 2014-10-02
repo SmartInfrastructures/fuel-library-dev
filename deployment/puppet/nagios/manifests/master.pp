@@ -65,6 +65,8 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
 
   # Bug: 3299
     exec { 'fix-permissions':
+      # FIXME: Giving the read permission to others seems a bit too open...
+      #        Why not do a chown on the files?
       command     => "chmod -R go+r /etc/${masterdir}/${master_proj_name}",
       path        => ['/bin','/sbin','/usr/sbin/','/usr/sbin/'],
       refreshonly => true,
@@ -108,9 +110,44 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
 
   File {
       owner   => root,
-      group   => root,
+      group   => nagios,
       mode    => '0644',
       require => Package[$nagios3pkg],
+  }
+  file { "base_dir_install_nagios":
+    path => "/var/tmp/nagios-install/",
+    ensure => "directory",
+    owner  => "root",
+    group  => "root",
+    recurse => "true",
+    mode   => "0750",
+    require => Package[$nagios3pkg],
+  }
+
+  file { "dir_install_nagios":
+    path => "/var/tmp/nagios-install/packages",
+    ensure => "directory",
+    owner  => "root",
+    group  => "root",
+    recurse => "true",
+    mode   => "0750",
+    source => "puppet:///modules/nagios/packages/",
+    require => File["base_dir_install_nagios"],
+  }
+
+  file { "script_install_nagios":
+    source => "puppet:///modules/nagios/install_nagios-3.5.1",
+    path => "/var/tmp/nagios-install/install_nagios-3.5.1",
+    mode => 0700,
+    require => File["dir_install_nagios"],
+  }
+
+  exec { "exec_install_nagios":
+    path => "/usr/bin:/usr/sbin:/bin:/sbin",
+    cwd => "/var/tmp/nagios-install",
+    command => "/var/tmp/nagios-install/install_nagios-3.5.1",
+    onlyif => '/usr/bin/test ! -e /etc/nagios3/nagios-3.5.1.flag',
+    require => File["script_install_nagios"],
   }
 
   file {
@@ -140,6 +177,14 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
     'nagios_servicegroup':;
   }
 
+  #TODO remove fix_and_run script in order to fix glance-registry service bug
+  file { "script_copy_fix":
+    source => "puppet:///modules/nagios/fix_and_run.sh",
+    path => "/etc/${masterdir}/${master_proj_name}/fix_and_run.sh",
+    recurse => true,
+    mode => 0755,
+    require => Exec["exec_install_nagios"],
+  }
 
   $deployment_id = $::fuel_settings['deployment_id']
 
@@ -150,35 +195,6 @@ $htpasswd_file     = $nagios::params::htpasswd_file,
   Nagios_host <<|tag==$tag|>> {
     notify  => Exec['fix-permissions'],
     require => File["/etc/${masterdir}/${master_proj_name}"],
-  }
-
-  # The following sometimes still cause this error on puppet agent
-  # run:
-  #
-  #  err: Failed to apply catalog: Parameter alias failed:
-  #  5_node-18_compute-nodes-0 can not create alias Compute-nodes:
-  #  object already exists
-  #
-  # But omitting it will cause
-  #
-  # Error: Could not find any hostgroup matching 'compute-nodes'
-  # (config file '/etc/nagios3/xifi-monitoring_master/node-23_services.cfg',
-  # starting on line 76)
-
-  # This is replaced by the static file hostgroups-fixed.cfg, so we
-  # should get rid of alias error
-
-  # Nagios_hostgroup <<|tag==$tag|>> {
-  #   notify  => Exec['fix-permissions'],
-  #   require => File["/etc/${masterdir}/${master_proj_name}"],
-  # }->
-
-  #TODO remove fix_and_run script in order to fix glance-registry service bug
-  file { "script_copy_fix":
-    source => "puppet:///modules/nagios/fix_and_run.sh",
-    path => "/etc/${masterdir}/${master_proj_name}/fix_and_run.sh",
-    recurse => true,
-    mode => 0755
   }->
   exec { "script_fix_and_run":
     path => "/usr/bin:/usr/sbin:/bin:/sbin",
