@@ -26,10 +26,11 @@ class fiware-monitoring {
           recurse => true,
           mode => 0755
           }->
-          service { "ngsi_adapter":
-            enable => "true",
-            ensure => "running"
-          }
+        ->
+      	exec { "run_fiware-monitoring":
+   	      command => "nohup /home/fiware-monitoring/ngsi_adapter/src/adapter --listenPort 1337 --brokerUrl http://localhost:1026 &",
+   	      path    => "/usr/local/bin/:/bin/",
+      	}
           # TODO: How to restrict to the monitoring network?
           firewall { '1337 allow ngsi_adapter access':
             port  => [1337],
