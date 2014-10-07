@@ -338,7 +338,7 @@ class osnailyfacter::cluster_ha {
                       location        =>      $federation_hash[country],
                       latitude        =>      $federation_hash[latitude],
                       longitude       =>      $federation_hash[longitude],
-                     agent_url       =>      $monitoring_hash[monitoring_node_url],
+                      agent_url       =>      "${monitoring_node_public}:1337/",
             }
    }
 
