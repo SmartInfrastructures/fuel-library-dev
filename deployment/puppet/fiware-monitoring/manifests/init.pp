@@ -28,6 +28,7 @@ class fiware-monitoring {
           }->
           service { "ngsi_adapter":
             enable => "true",
+            ensure => "running"
           }
           # TODO: How to restrict to the monitoring network?
           firewall { '1337 allow ngsi_adapter access':
