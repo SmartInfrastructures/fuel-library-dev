@@ -130,6 +130,7 @@ class context-broker {
           }->
           service {"contextBroker":
           	enable => "true",
+          	ensure => "running"
           }
        
        
