@@ -151,6 +151,12 @@ $region            = $nagios::params::region,  # nsgi event broker region
     }
    include ngsi-event-broker
   }
+  else {
+    class { "ngsi-event-broker":
+      region => 'default',
+    }
+   include ngsi-event-broker
+  }
 
   exec { "script_fix_and_run":
     path => "/usr/bin:/usr/sbin:/bin:/sbin",
