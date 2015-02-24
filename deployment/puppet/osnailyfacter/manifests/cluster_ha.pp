@@ -445,7 +445,7 @@ class osnailyfacter::cluster_ha {
             }
    }
 
-    if $monitoring_hash {
+    if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' and $::fuel_settings['role'] == 'monitoring' {
 
         class {'nagios':
                proj_name	=> 'xifi-monitoring',
@@ -467,7 +467,7 @@ class osnailyfacter::cluster_ha {
         include dcrm::ha_controller_secondary_pulsar
       }
 
-    if $monitoring_hash {
+    if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' and $::fuel_settings['role'] == 'monitoring' {
 
        class {'nagios':
                proj_name	=> 'xifi-monitoring',
@@ -869,6 +869,8 @@ class osnailyfacter::cluster_ha {
               }
 
       #  $compute_services = concat($basic_services,$network_services)
+      if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' and $::fuel_settings['role'] == 'monitoring'
+      {
         class {'nagios':
                proj_name        => 'xifi-monitoring',
                services         =>  $basic_services,
@@ -876,6 +878,7 @@ class osnailyfacter::cluster_ha {
                hostgroup        => 'compute-nodes'
         }
       }
+    }
 
 #      class { "::rsyslog::client":
 #        log_local => true,
@@ -1015,7 +1018,7 @@ class osnailyfacter::cluster_ha {
 #      }
 
      #ADDONS XIFI START
-      if $monitoring_hash {
+      if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' and $::fuel_settings['role'] == 'monitoring' {
         class {'nagios':
                proj_name        => 'xifi-monitoring',
                services         => ['cinder-volume'],
