@@ -485,7 +485,7 @@ class osnailyfacter::cluster_simple {
 
       $controller_services = concat($basic_services, $network_services)
 
-      if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' {
+      if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' and $::fuel_settings['role'] == 'monitoring' {
         class {'nagios':
           services => $controller_services,
           proj_name => 'xifi-monitoring',
@@ -589,7 +589,7 @@ class osnailyfacter::cluster_simple {
         include dcrm::compute_pulsar
       }
 
-      if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' {
+      if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' and $::fuel_settings['role'] == 'monitoring' {
         $compute_services = concat($basic_services,$network_services)
         class {'nagios':
                proj_name        => 'xifi-monitoring',
@@ -733,7 +733,7 @@ class osnailyfacter::cluster_simple {
       }
 
       #ADDONS XIFI START
-      if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' {
+      if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' and $::fuel_settings['role'] == 'monitoring' {
         class {'nagios':
                proj_name        => 'xifi-monitoring',
                services         => ['cinder-volume'],
