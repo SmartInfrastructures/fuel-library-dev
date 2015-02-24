@@ -29,7 +29,7 @@ class nagios::common inherits nagios {
       }
     } else {
       $c_num = $current + 1
-
+#TODO: a_disks is not a hash or array when accessing it with 0 at /etc/puppet/modules/nagios/manifests/common.pp:33 on node node-9.domain.tld
       nagios::common::add_disk { $a_disks[$current]:
         current => $c_num,
       }
@@ -38,7 +38,6 @@ class nagios::common inherits nagios {
       }
     }
   }
-  
   define run_disk($disk) {
     notify {"creating service for mountpoint ${disk}":}
     nagios::service::services { $disk:

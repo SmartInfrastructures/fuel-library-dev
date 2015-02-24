@@ -485,12 +485,16 @@ class osnailyfacter::cluster_simple {
 
       $controller_services = concat($basic_services, $network_services)
 
-      class {'nagios':
-        services => $controller_services,
-        proj_name => 'xifi-monitoring',
-        whitelist => [$monitoring_node_address, $monitoring_node_public],
-        hostgroup => 'controller-nodes'
-          }
+      if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' {
+        class {'nagios':
+          services => $controller_services,
+          proj_name => 'xifi-monitoring',
+          whitelist => [$monitoring_node_address, $monitoring_node_public],
+          hostgroup => 'controller-nodes'
+            }
+
+        }
+
       if ($::mellanox_mode == 'ethernet') {
         $ml2_eswitch = $::fuel_settings['neutron_mellanox']['ml2_eswitch']
         class { 'mellanox_openstack::controller':
@@ -585,7 +589,7 @@ class osnailyfacter::cluster_simple {
         include dcrm::compute_pulsar
       }
 
-      if $monitoring_hash['monitoring_server'] == 'nagios' {
+      if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' {
         $compute_services = concat($basic_services,$network_services)
         class {'nagios':
                proj_name        => 'xifi-monitoring',
@@ -729,7 +733,7 @@ class osnailyfacter::cluster_simple {
       }
 
       #ADDONS XIFI START
-      if $monitoring_hash {
+      if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' {
         class {'nagios':
                proj_name        => 'xifi-monitoring',
                services         => ['cinder-volume'],
