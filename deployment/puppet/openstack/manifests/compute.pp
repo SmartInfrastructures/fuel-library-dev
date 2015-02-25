@@ -304,6 +304,16 @@ class openstack::compute (
     }
   }
 
+  # Enable the file injection feature
+  if !$::fuel_settings['storage']['images_ceph'] {
+    if $::osfamily == 'RedHat' {
+      nova_config { 'libvirt/inject_partition': value => '-1'; }
+      }
+    else {
+      nova_config { 'libvirt/inject_partition': value => '1'; }
+    }
+  }
+
   # From legacy libvirt.pp
   if !($vncproxy_host) {
     warning("VNC is enabled and \$vncproxy_host must be specified nova::compute assumes that it can\
@@ -584,6 +594,23 @@ on packages update": }
       'DEFAULT/linuxnet_interface_driver':       value => 'nova.network.linux_net.LinuxOVSInterfaceDriver';
       'DEFAULT/linuxnet_ovs_integration_bridge': value => $quantum_config['L2']['integration_bridge'];
     }
+
+    augeas { 'sysctl-net.bridge.bridge-nf-call-arptables':
+      context => '/files/etc/sysctl.conf',
+      changes => "set net.bridge.bridge-nf-call-arptables '1'",
+      before  => Service['libvirt'],
+    }
+    augeas { 'sysctl-net.bridge.bridge-nf-call-iptables':
+      context => '/files/etc/sysctl.conf',
+      changes => "set net.bridge.bridge-nf-call-iptables '1'",
+      before  => Service['libvirt'],
+    }
+    augeas { 'sysctl-net.bridge.bridge-nf-call-ip6tables':
+      context => '/files/etc/sysctl.conf',
+      changes => "set net.bridge.bridge-nf-call-ip6tables '1'",
+      before  => Service['libvirt'],
+    }
+
   }
 
   ####### Disable upstart startup on install #######

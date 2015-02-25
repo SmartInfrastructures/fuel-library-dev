@@ -229,7 +229,7 @@ class osnailyfacter::cluster_ha {
 
   if (member($roles, 'cinder') and $storage_hash['volumes_lvm']) {
     $manage_volumes = 'iscsi'
-  } elsif (member($roles, 'cinder') and $storage_hash['volumes_vmdk']) {
+  } elsif ($storage_hash['volumes_vmdk']) {
     $manage_volumes = 'vmdk'
   } elsif ($storage_hash['volumes_ceph']) {
     $manage_volumes = 'ceph'
@@ -392,10 +392,10 @@ class osnailyfacter::cluster_ha {
       horizon_use_ssl                => $::fuel_settings['horizon_use_ssl'],
       use_unicast_corosync           => $::fuel_settings['use_unicast_corosync'],
       nameservers                    => $::dns_nameservers,
-      max_retries                    => $max_retries,
-      max_pool_size                  => $max_pool_size,
-      max_overflow                   => $max_overflow,
-      idle_timeout                   => $idle_timeout,
+      max_retries                    => $::osnailyfacter::cluster_ha::max_retries,
+      max_pool_size                  => $::osnailyfacter::cluster_ha::max_pool_size,
+      max_overflow                   => $::osnailyfacter::cluster_ha::max_overflow,
+      idle_timeout                   => $::osnailyfacter::cluster_ha::idle_timeout,
       nova_report_interval           => $::nova_report_interval,
       nova_service_down_time         => $::nova_service_down_time,
     }
@@ -490,9 +490,18 @@ class osnailyfacter::cluster_ha {
     class { 'mellanox_openstack::openibd' : }
   }
 
+  if ($::mellanox_mode != 'disabled') {
+    class { 'mellanox_openstack::ofed_recompile' : }
+  }
+
   case $::fuel_settings['role'] {
     /controller/ : {
       include osnailyfacter::test_controller
+
+      # Reduce swapiness on controllers, see LP#1413702
+      sysctl::value { 'vm.swappiness':
+        value => "10"
+      }
 
       class { '::cluster':
         stage             => 'corosync_setup',
@@ -639,7 +648,12 @@ class osnailyfacter::cluster_ha {
           Openstack::Ha::Haproxy_service <| |> ->
           Exec<| title=='wait-for-haproxy-nova-backend' |>
         }
+
+        nova_config {
+          'DEFAULT/teardown_unused_network_gateway': value => 'True'
+        }
       }
+
       if ($::use_ceph){
         Class['openstack::controller'] -> Class['ceph']
       }
@@ -691,7 +705,7 @@ class osnailyfacter::cluster_ha {
 
         keystone_host     => $controller_node_address,
         keystone_user     => 'heat',
-        keystone_password => 'heat',
+        keystone_password =>  $heat_hash['user_password'],
         keystone_tenant   => 'services',
 
         keystone_ec2_uri  => "http://${controller_node_address}:5000/v2.0",

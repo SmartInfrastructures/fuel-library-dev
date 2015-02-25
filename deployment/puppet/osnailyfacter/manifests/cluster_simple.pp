@@ -181,7 +181,7 @@ class osnailyfacter::cluster_simple {
   # Determine who should get the volume service
   if (member($roles, 'cinder') and $storage_hash['volumes_lvm']) {
     $manage_volumes = 'iscsi'
-  } elsif (member($roles, 'cinder') and $storage_hash['volumes_vmdk']) {
+  } elsif ($storage_hash['volumes_vmdk']) {
     $manage_volumes = 'vmdk'
   } elsif ($storage_hash['volumes_ceph']) {
     $manage_volumes = 'ceph'
@@ -345,11 +345,16 @@ class osnailyfacter::cluster_simple {
             api_retries     => 10,
           }
         }
-        Class[nova::api, nova::keystone::auth] -> Nova_floating_range <| |>
+        Class[keystone::roles::admin, nova::api, nova::keystone::auth] -> Nova_floating_range <| |>
       }
 
       if ($::use_ceph){
         Class['openstack::controller'] -> Class['ceph']
+      }
+
+      # Reduce swapiness on controllers, see LP#1413702
+      sysctl::value { 'vm.swappiness':
+        value => "10"
       }
 
       #ADDONS START

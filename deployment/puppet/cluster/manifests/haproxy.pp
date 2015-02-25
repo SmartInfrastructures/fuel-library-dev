@@ -27,7 +27,10 @@ class cluster::haproxy (
   class { 'haproxy::base':
     global_options   => $global_options,
     defaults_options => merge($::haproxy::params::defaults_options,
-                              {'mode' => 'http'}),
+                              {'mode'   => 'http'},
+                              {'option' => 'http-server-close'},
+                              {'option' => 'splice-auto'}
+                        ),
     use_include      => true,
   }
 
