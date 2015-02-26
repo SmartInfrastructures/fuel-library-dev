@@ -7,7 +7,8 @@ class nagios::common inherits nagios {
 
   if $::virtual == 'physical' {
     $a_disks = split($::mountpoints, ',')
-    nagios::common::add_disk { 'Add disks': }
+    # Skip it until we find a workaround
+    #nagios::common::add_disk { 'Add disks': }
 
     file{"/var/run/nagios":
       owner   => nagios,
@@ -22,6 +23,8 @@ class nagios::common inherits nagios {
   }
 
 
+  # This is a workaround for puppet not supporting loops,
+  # unfortunatley it does not work
   define add_disk($disk_count = size($a_disks), $current = 0) {
     if $current == $disk_count -1 {
       nagios::common::run_disk { $a_disks[$current]:
