@@ -494,7 +494,7 @@ class osnailyfacter::cluster_simple {
         class {'nagios':
           services => $controller_services,
           proj_name => 'xifi-monitoring',
-          whitelist => [$::osnailyfacter::cluster_ha::monitoring_address, $::osnailyfacter::cluster_ha::monitoring_public],
+          whitelist => [$::osnailyfacter::cluster_simple::monitoring_address, $::osnailyfacter::cluster_simple::monitoring_public],
           hostgroup => 'controller-nodes'
             }
 
@@ -599,7 +599,7 @@ class osnailyfacter::cluster_simple {
         class {'nagios':
                proj_name        => 'xifi-monitoring',
                services         => $compute_services,
-               whitelist        => [$::osnailyfacter::cluster_ha::monitoring_address, $::osnailyfacter::cluster_ha::monitoring_public, $controller_node_address, $controller_node_public],
+               whitelist        => [$::osnailyfacter::cluster_simple::monitoring_address, $::osnailyfacter::cluster_simple::monitoring_public, $controller_node_address, $controller_node_public],
           hostgroup        => 'compute-nodes'
         }
       if $use_vmware_nsx {
@@ -742,7 +742,7 @@ class osnailyfacter::cluster_simple {
         class {'nagios':
                proj_name        => 'xifi-monitoring',
                services         => ['cinder-volume'],
-               whitelist        => [$::osnailyfacter::cluster_ha::monitoring_address, $::osnailyfacter::cluster_ha::monitoring_public, $controller_node_address, $controller_node_public],
+               whitelist        => [$::osnailyfacter::cluster_simple::monitoring_address, $::osnailyfacter::cluster_simple::monitoring_public, $controller_node_address, $controller_node_public],
                hostgroup        => 'volume-nodes'
         }
       }
