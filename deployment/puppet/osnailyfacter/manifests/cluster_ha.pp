@@ -467,6 +467,12 @@ class osnailyfacter::cluster_ha {
         include dcrm::ha_controller_secondary_pulsar
       }
 
+      if !$::fuel_settings['monitoring'] {
+        $monitoring_hash = {}
+        } else {
+        $monitoring_hash = $::fuel_settings['monitoring']
+      }
+
     if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios'{
 
        class {'nagios':
