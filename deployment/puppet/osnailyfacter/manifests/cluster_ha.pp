@@ -450,7 +450,7 @@ class osnailyfacter::cluster_ha {
         class {'nagios':
                proj_name	=> 'xifi-monitoring',
                services		=> $controller_services,
-               whitelist	=> [$::osnailyfacter::cluster_ha::monitoring_node_address, $::osnailyfacter::cluster_ha::monitoring_node_public],
+               whitelist	=> [$::osnailyfacter::cluster_ha::monitoring_node_address],
                hostgroup	=> 'controller-nodes'
         }
      }
@@ -478,7 +478,7 @@ class osnailyfacter::cluster_ha {
        class {'nagios':
                proj_name	=> 'xifi-monitoring',
                services		=> $controller_services,
-              whitelist	=> [$::osnailyfacter::cluster_ha::osnailyfacter::cluster_ha::monitoring_node_address, $::osnailyfacter::cluster_ha::monitoring_node_public],
+              whitelist	=> [$::osnailyfacter::cluster_ha::osnailyfacter::cluster_ha::monitoring_node_address],
               hostgroup	=> 'sec-controller-nodes'
        }
      }
@@ -894,7 +894,7 @@ class osnailyfacter::cluster_ha {
         class {'nagios':
                proj_name        => 'xifi-monitoring',
                services         =>  $basic_services,
-               whitelist        => [$::osnailyfacter::cluster_ha::monitoring_node_address, $::osnailyfacter::cluster_ha::monitoring_node_public],
+               whitelist        => [$::osnailyfacter::cluster_ha::monitoring_node_address],
                hostgroup        => 'compute-nodes'
         }
       }
@@ -1042,7 +1042,7 @@ class osnailyfacter::cluster_ha {
         class {'nagios':
                proj_name        => 'xifi-monitoring',
                services         => ['cinder-volume'],
-               whitelist        => [$::osnailyfacter::cluster_ha::monitoring_node_address, $::osnailyfacter::cluster_ha::monitoring_node_public],
+               whitelist        => [$::osnailyfacter::cluster_ha::monitoring_node_address],
                hostgroup        => 'volume-nodes'
         }
       }
