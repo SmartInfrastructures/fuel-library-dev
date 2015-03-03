@@ -25,20 +25,12 @@ class osnailyfacter::cluster_simple {
     $monitoring_hash = {}
   } else {
     $monitoring_hash = $::fuel_settings['monitoring']
+  }
+
   if $fuel_settings['cinder_nodes'] {
      $cinder_nodes_array   = $::fuel_settings['cinder_nodes']
   } else {
      $cinder_nodes_array = []
-  }
-
-  # why
-  $basic_services = ['nova-compute', 'libvirt']
-  $network_services = $::use_quantum ? {
-    true  => ['quantum', ],
-    false => ['nova-network', ],
-    default => ['nova-network', ]
-  }
-
   }
 
   # All hash assignment from a dimensional hash must be in the local scope or they will
@@ -486,6 +478,13 @@ class osnailyfacter::cluster_simple {
         }
       }
 
+      $basic_services = ['nova-compute','libvirt']
+      $network_services = $::use_quantum ? {
+        true  => ['quantum',],
+        false => ['nova-network',],
+        default => ['nova-network',]
+      }
+
       $controller_services = concat($basic_services, $network_services)
 
       if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' {
@@ -592,14 +591,24 @@ class osnailyfacter::cluster_simple {
         include dcrm::compute_pulsar
       }
 
+
       if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' {
+        $basic_services = ['nova-compute','libvirt']
+        $network_services = $::use_quantum ? {
+          true  => ['quantum',],
+          false => ['nova-network',],
+          default => ['nova-network',]
+        }
+
         $compute_services = concat($basic_services,$network_services)
+
         class {'nagios':
                proj_name        => 'xifi-monitoring',
                services         => $compute_services,
                whitelist        => [$::osnailyfacter::cluster_simple::monitoring_node_address],
           hostgroup        => 'compute-nodes'
         }
+
       if $use_vmware_nsx {
         class {'plugin_neutronnsx':
           neutron_config     => $quantum_config,
@@ -611,6 +620,7 @@ class osnailyfacter::cluster_simple {
 
       } # COMPUTE ENDS
     }
+
     "mongo" : {
       if $debug {
         $mongo_set_parameter = 'logLevel=2'

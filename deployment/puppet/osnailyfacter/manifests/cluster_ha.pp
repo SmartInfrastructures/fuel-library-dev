@@ -888,12 +888,12 @@ class osnailyfacter::cluster_ha {
                default => ['nova-network']
               }
 
-      #  $compute_services = concat($basic_services,$network_services)
+      $compute_services = concat($basic_services,$network_services)
       if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios'
       {
         class {'nagios':
                proj_name        => 'xifi-monitoring',
-               services         =>  $basic_services,
+               services         =>  $compute_services,
                whitelist        => [$::osnailyfacter::cluster_ha::monitoring_node_address],
                hostgroup        => 'compute-nodes'
         }
