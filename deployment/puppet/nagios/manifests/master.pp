@@ -89,14 +89,27 @@ $region            = $nagios::params::region,  # nsgi event broker region
       }
     }
     'Debian': {
-      augeas {'configs':
-        lens    => 'NagiosCfg.lns',
-        incl    => '/etc/nagios*/*.cfg',
-        context => "/files/etc/${masterdir}/nagios.cfg",
-        changes => [
-          "set cfg_dir[2] \"/etc/${masterdir}/${master_proj_name}\"",
-          'set check_external_commands 1',
-        ],
+
+      file_line { "/etc/${masterdir}/nagios.cfg check":
+        path => "/etc/nagios3/nagios.cfg",
+        line => "check_external_commands=1",
+        match   => "^#?check_external_commands=.*$",
+        require => Package[$nagios3pkg],
+      }
+
+      file_line { "/etc/${masterdir}/nagios.cfg cfg-dir1":
+        ensure => absent,
+        path => "/etc/${masterdir}/nagios.cfg",
+        line => "cfg_dir=/etc/nagios3/conf.d",
+        # match   => "cfg_dir=/etc/nagios3/conf.d",
+        require => Package[$nagios3pkg],
+      }
+
+      file_line { "/etc/${masterdir}/nagios.cfg cfg-dir2":
+        ensure => present,
+        path => "/etc/${masterdir}/nagios.cfg",
+        line => "cfg_dir=/etc/${masterdir}/${master_proj_name}",
+        # match   => "cfg_dir=/etc/nagios3/conf.d",
         require => Package[$nagios3pkg],
       }
     }
