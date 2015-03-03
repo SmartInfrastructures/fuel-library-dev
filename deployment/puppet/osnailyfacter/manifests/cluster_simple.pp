@@ -478,7 +478,7 @@ class osnailyfacter::cluster_simple {
         }
       }
 
-      $basic_services = ['nova-compute','libvirt']
+      $basic_services = ['keystone', 'nova-scheduler', 'cinder-scheduler','memcached','nova-api','cinder-api','glance-api','glance-registry','horizon']
       $network_services = $::use_quantum ? {
         true  => ['quantum',],
         false => ['nova-network',],
