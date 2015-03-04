@@ -113,7 +113,7 @@ $nrpeservice       = $nagios::params::nrpeservice,
   # Sometimes the nrpe starts with the wrong configuration, force a restart
   exec { "fix wrong restart":
     path => "/usr/bin:/usr/sbin:/bin:/sbin",
-    command => "/etc/init.d/nagios-nrpe-server restart; : /usr/bin/killall -9 nrpe; /etc/init.d/nagios-nrpe-server restart",
+    command => "/etc/init.d/nagios-nrpe-server restart; /usr/bin/killall -9 nrpe; /etc/init.d/nagios-nrpe-server restart",
     require => Service[$nrpeservice]
   }
 
