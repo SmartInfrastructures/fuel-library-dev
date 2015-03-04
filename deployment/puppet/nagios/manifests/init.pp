@@ -110,6 +110,13 @@ $nrpeservice       = $nagios::params::nrpeservice,
     ],
   }
 
+  # Sometimes the nrpe starts with the wrong configuration, force a restart
+  exec { "fix wrong restart":
+    path => "/usr/bin:/usr/sbin:/bin:/sbin",
+    command => "/etc/init.d/nagios-nrpe-server restart; : /usr/bin/killall -9 nrpe; /etc/init.d/nagios-nrpe-server restart",
+    require => Service[$nrpeservice]
+  }
+
   # This is needed to send the data to puppetdb, the first run will
   # configure puppetdb, the second should send the exported resources
   # (but this does not happens everytime).
