@@ -478,7 +478,7 @@ class osnailyfacter::cluster_ha {
        class {'nagios':
                proj_name	=> 'xifi-monitoring',
                services		=> $controller_services,
-              whitelist	=> [$::osnailyfacter::cluster_ha::osnailyfacter::cluster_ha::monitoring_node_address],
+              whitelist	=> [$::osnailyfacter::cluster_ha::monitoring_node_address],
               hostgroup	=> 'sec-controller-nodes'
        }
      }
