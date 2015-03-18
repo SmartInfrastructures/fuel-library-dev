@@ -662,7 +662,7 @@ class osnailyfacter::cluster_simple {
                       templateservice => {'name' => 'default-service', 'check_interval'=> $monitoring_hash['nagios_service_check_interval']},
                       htpasswd        => {"$nagios_username" => $nagios_hash['password']},
                       contactgroups   => {'group' => 'admins', 'alias' => 'Admins'},
-                      contacts        => {'email' => $nagios_hash['nagios_email']},
+                      contacts        => {'email' => $monitoring_hash['nagios_email']},
                       region          => $monitoring_hash['region'],
               }
       }
