@@ -480,7 +480,7 @@ class osnailyfacter::cluster_simple {
 
       $basic_services = ['keystone', 'nova-scheduler', 'cinder-scheduler','memcached','nova-api','cinder-api','glance-api','glance-registry','horizon']
       $network_services = $::use_quantum ? {
-        true  => ['quantum',],
+        true  => ['neutron',],
         false => ['nova-network',],
         default => ['nova-network',]
       }
@@ -595,7 +595,7 @@ class osnailyfacter::cluster_simple {
       if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' {
         $basic_services = ['nova-compute','libvirt']
         $network_services = $::use_quantum ? {
-          true  => ['quantum',],
+          true  => ['neutron',],
           false => ['nova-network',],
           default => ['nova-network',]
         }

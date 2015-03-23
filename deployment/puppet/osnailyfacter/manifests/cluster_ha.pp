@@ -404,9 +404,9 @@ class osnailyfacter::cluster_ha {
         $basic_services = ['keystone', 'nova-scheduler', 'cinder-scheduler','memcached','nova-api','cinder-api','glance-api','glance-registry','horizon']
 
         $network_services = $::use_quantum ? {
-          true  => ['quantum-api'],
-          false => [],
-          default => []
+          true  => ['neutron'],
+          false => ['nova-network'],
+          default => ['nova-network']
         }
 
         $controller_services = concat($basic_services,$network_services)
@@ -883,7 +883,7 @@ class osnailyfacter::cluster_ha {
 
         $basic_services = ['nova-compute','nova-network','libvirt']
         $network_services = $::use_quantum ? {
-               true  => ['quantum'],
+               true  => ['neutron'],
                false => ['nova-network'],
                default => ['nova-network']
               }
