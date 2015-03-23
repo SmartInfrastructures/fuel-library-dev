@@ -4,6 +4,7 @@
 command[check_nova_compute]=<%= libdir %>/nagios/plugins/check_procs -c 1:10 -C nova-compute
 command[check_nova_network]=<%= libdir %>/nagios/plugins/check_procs -c 1:10 -C nova-network
 command[check_quantum]=<%= libdir %>/nagios/plugins/check_procs -w 1: -u quantum
+command[check_neutron]=<%= libdir %>/nagios/plugins/check_procs -w 1: -u neutron
 command[check_nova_scheduler]=<%= libdir %>/nagios/plugins/check_procs -c 1:10 -C nova-scheduler
 command[check_nova_consoleauth]=<%= libdir %>/nagios/plugins/check_procs -c 1:10 -a nova-consoleauth
 command[check_nova_cert]=<%= libdir %>/nagios/plugins/check_procs -c 1:10 -C nova-cert
