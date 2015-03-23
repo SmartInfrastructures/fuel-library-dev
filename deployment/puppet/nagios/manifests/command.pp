@@ -19,8 +19,8 @@ class nagios::command inherits nagios::master {
     command => '$USER1$/check_http -H $HOSTADDRESS$ -p $ARG1$',
   }
 
-  nagios::command::commands { 'check_galera_mysql':
     command => "$USER1$/check_mysql -H $HOSTADDRESS$ -P ${nagios::master::mysql_port} -u ${nagios::master::mysql_user} -p ${nagios::master::mysql_pass}",
+  nagios::command::commands { 'check_mysql':
   }
 
   nagios::command::commands { 'check_rabbitmq':
