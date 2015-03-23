@@ -18,5 +18,5 @@ command[check_swift_proxy]=<%= libdir %>/nagios/plugins/check_procs -c 1:10 -a s
 command[check_swift_account]=<%= libdir %>/nagios/plugins/check_procs -c 1:10 -a swift-account-server
 command[check_swift_object]=<%= libdir %>/nagios/plugins/check_procs -c 1:10 -a swift-object-server
 command[check_swift_container]=<%= libdir %>/nagios/plugins/check_procs -c 1:10 -a swift-container-server
-command[check_swift_ring]=<%= libdir %>/nagios/plugins/check_os_swiftrecon objmd5
-command[check_libvirt]=<%= libdir %>/nagios/plugins/check_os_libvirt connect -H 127.0.0.1 -m qemu+tcp
+command[check_swift_ring]=/usr/lib64/nagios/plugins/check_os_swiftrecon objmd5
+command[check_libvirt]=/usr/lib64/nagios/plugins/check_os_libvirt connect -H 127.0.0.1 -m qemu+tcp
