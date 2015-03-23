@@ -400,8 +400,8 @@ class osnailyfacter::cluster_ha {
       nova_service_down_time         => $::nova_service_down_time,
     }
 
- # for completeness we should include "rabbit" and "mysql" but there are some issues with the nrpe to be explored
-        $basic_services = ['keystone', 'nova-scheduler', 'cinder-scheduler', 'memcached', 'nova-api', 'cinder-api', 'glance-api', 'glance-registry', 'horizon',]
+# for completeness we should include "rabbit" but there are some issues with the nrpe to be explored
+        $basic_services = ['keystone', 'nova-scheduler', 'cinder-scheduler', 'memcached', 'nova-api', 'cinder-api', 'glance-api', 'glance-registry', 'horizon', 'mysql',]
 
         $network_services = $::use_quantum ? {
           true  => ['neutron'],
