@@ -49,12 +49,22 @@ $nrpeservice       = $nagios::params::nrpeservice,
 
   if inline_template("<%= !(services & ['swift-proxy', 'swift-account',
     'swift-container', 'swift-object', 'swift-ring']).empty? -%>") == 'true' {
+
+    package {'python-osnagios':
+      require => Package[$nrpepkg],
+    }
+
     package {'nagios-plugins-os-swift':
       require => Package[$nrpepkg],
     }
   }
 
   if member($services, 'libvirt') == true {
+
+    package {'python-osnagios':
+      require => Package[$nrpepkg],
+    }
+
     package {'nagios-plugins-os-libvirt':
       require => Package[$nrpepkg],
     }
