@@ -54,6 +54,13 @@ $nrpeservice       = $nagios::params::nrpeservice,
       require => Package[$nrpepkg],
     }
 
+    exec { "link python module for swift":
+      path => "/usr/bin:/usr/sbin:/bin:/sbin",
+      cwd => "/",
+      command => "ln -s /usr/lib64/python2.6/site-packages/os_nagios /usr/lib/python2.7/os_nagios",
+      require => Package['python-osnagios']
+    }
+
     package {'nagios-plugins-os-swift':
       require => Package[$nrpepkg],
     }
@@ -68,6 +75,14 @@ $nrpeservice       = $nagios::params::nrpeservice,
     package {'nagios-plugins-os-libvirt':
       require => Package[$nrpepkg],
     }
+
+    exec { "link python module for libvirt":
+      path => "/usr/bin:/usr/sbin:/bin:/sbin",
+      cwd => "/",
+      command => "ln -s /usr/lib64/python2.6/site-packages/os_nagios /usr/lib/python2.7/os_nagios",
+      require => Package['python-osnagios']
+    }
+
   }
 
   File {
