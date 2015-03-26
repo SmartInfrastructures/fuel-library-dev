@@ -654,7 +654,7 @@ class osnailyfacter::cluster_simple {
                       nginx           => false,
                       mysql_user      => 'root',
                       mysql_pass      => $mysql_hash[root_password],
-                      mysql_port      => '3307',
+                      mysql_port      => '3306',
                       rabbit_pass       => $rabbit_hash['password'],
                       rabbit_user     => $rabbit_hash['user'],
                       rabbit_port     => '5673',
