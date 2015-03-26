@@ -27,7 +27,7 @@ class nagios::params {
     'glance-registry' => 'check_nrpe_1arg!check_glance_registry',
     'horizon' => 'check_http_api!80',
     'rabbitmq' => 'check_rabbitmq',
-    'mysql' => 'check_mysql',
+    'mysql' => 'nrpe_check_mysql',
     'apt' => 'nrpe_check_apt',
     'yum' => 'nrpe_check_yum',
     'kernel' => 'nrpe_check_kernel',

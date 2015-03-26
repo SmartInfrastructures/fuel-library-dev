@@ -10,3 +10,5 @@ command[check_procs_zombie]=<%= libdir %>/nagios/plugins/check_procs -w $ARG1$ -
 command[check_ide_smart]=sudo <%= libdir %>/nagios/plugins/check_ide_smart -d $ARG1$ -n
 command[check_swap]=<%= libdir %>/nagios/plugins/check_swap -w $ARG1$ -c $ARG2$
 command[check_users]=<%= libdir %>/nagios/plugins/check_users -w $ARG1$ -c $ARG2$
+# Use localhost because of default grant are only for localhost
+command[check_mysql]=<%= libdir %>/nagios/plugins/check_mysql -H localhost -u "$ARG2$" -p "$ARG3$"
