@@ -24,7 +24,7 @@ class nagios::command inherits nagios::master {
   }
 
   nagios::command::commands { 'nrpe_check_mysql':
-    command => '$USER1$/check_nrpe -H $HOSTADDRESS$ -c check_mysql -a $HOSTADDRESS$ ${nagios::master::mysql_user} ${nagios::master::mysql_pass} ${nagios::master::mysql_port}',
+    command => "\$USER1\$/check_nrpe -H \$HOSTADDRESS\$ -c check_mysql -a \$HOSTADDRESS\$ ${nagios::master::mysql_user} ${nagios::master::mysql_pass} ${nagios::master::mysql_port}",
   }
 
   nagios::command::commands { 'check_rabbitmq':
