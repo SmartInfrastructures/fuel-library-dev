@@ -881,7 +881,7 @@ class osnailyfacter::cluster_ha {
 
     if $monitoring_hash {
 
-        $basic_services = ['nova-compute','nova-network','libvirt']
+        $basic_services = ['nova-compute','libvirt']
         $network_services = $::use_quantum ? {
                true  => ['neutron'],
                false => ['nova-network'],
