@@ -9,6 +9,7 @@ define nagios::host::hosts() {
     use        => 'default-host',
     address    => $::fqdn,
     host_name  => $::fqdn,
+    contact_groups => ['admins'],
     target     => "/etc/${nagios::params::masterdir}/${nagios::master_proj_name}/hosts.cfg",
     tag => "deployment_${deployment_id}"
   }
