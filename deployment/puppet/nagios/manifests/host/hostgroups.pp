@@ -12,7 +12,6 @@ define nagios::host::hostgroups() {
     hostgroup_name => $name,
     ensure         => present,
     alias          => $alias,
-    contact_groups => ['admins'],
     target         => "/etc/${nagios::params::masterdir}/${nagios::master_proj_name}/hostgroups.cfg",
     tag            => "deployment_${deployment_id}"
   }
