@@ -973,7 +973,7 @@ class osnailyfacter::cluster_ha {
                       htpasswd        => {"$nagios_username" => $nagios_hash['password']},
                       hostgroups      => ['compute-nodes', 'controller-nodes', 'swift-storage', 'swift-proxy'],
                       contactgroups   => {'group' => 'admins', 'alias' => 'Admins'},
-                      contacts        => {'email' => $monitoring_hash['nagios_email']},
+                      contacts        => {'email' => $monitoring_hash['nagios_email'], 'user' => 'admin', 'alias' => 'Nagios Admin', 'group' => 'admins'},
                       region          => $monitoring_hash['region'],
              }
 
