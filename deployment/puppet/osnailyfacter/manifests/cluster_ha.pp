@@ -405,8 +405,8 @@ class osnailyfacter::cluster_ha {
 
         $network_services = $::use_quantum ? {
           true  => ['neutron'],
-          false => ['nova-network'],
-          default => ['nova-network']
+          false => ['nova-conductor'],
+          default => ['nova-conductor']
         }
 
         $controller_services = concat($basic_services,$network_services)

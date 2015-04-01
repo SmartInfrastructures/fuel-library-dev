@@ -481,8 +481,8 @@ class osnailyfacter::cluster_simple {
       $basic_services = ['keystone', 'nova-scheduler', 'cinder-scheduler','memcached','nova-api','cinder-api','glance-api','glance-registry','horizon', 'mysql']
       $network_services = $::use_quantum ? {
         true  => ['neutron',],
-        false => ['nova-network',],
-        default => ['nova-network',]
+        false => ['nova-conductor',],
+        default => ['nova-conductor',]
       }
 
       $controller_services = concat($basic_services, $network_services)
