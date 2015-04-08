@@ -68,6 +68,14 @@ $region            = $nagios::params::region,  # nsgi event broker region
 
   package {$nagios3pkg:}
 
+    # this is needed to have the json module properly recognized by
+    # the nagios plugins
+    exec { 'fix-perl-json':
+      command     => "ln -s /usr/share/perl5/Data/Serializer/JSON.pm /usr/share/perl5",
+      path        => ['/bin','/sbin','/usr/sbin/','/usr/sbin/'],
+      require => Package[$nagios3pkg]
+    }
+
   if  $::osfamily == 'RedHat' and $rabbitmq == true {
     package {'nagios-plugins-os-rabbitmq':
       require => Package[$nagios3pkg]
