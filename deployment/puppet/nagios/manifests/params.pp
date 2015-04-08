@@ -81,7 +81,13 @@ class nagios::params {
     }
     'Debian': {
       $nagios3pkg = [
-        'nagios-nrpe-plugin'
+        'nagios-nrpe-plugin',
+        'nagios-plugin-mongodb',
+        'nagios-plugins-ceph',
+        'nagios-plugins-rabbitmq',
+        'liburi-perl',
+        'libdata-serializer-perl',
+        'liblwp-useragent-determined-perl',
  ]
       $nrpepkg = [
         'binutils',
