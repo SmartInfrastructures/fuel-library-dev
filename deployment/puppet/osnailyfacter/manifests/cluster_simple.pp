@@ -633,6 +633,25 @@ class osnailyfacter::cluster_simple {
         use_syslog                  => $use_syslog,
         set_parameter               => $mongo_set_parameter,
       }
+
+      $basic_services = ['keystone', 'nova-scheduler', 'cinder-scheduler','memcached','nova-api','cinder-api','glance-api','glance-registry','horizon', 'mysql']
+      $network_services = $::use_quantum ? {
+        true  => ['neutron',],
+        false => ['nova-conductor',],
+        default => ['nova-conductor',]
+      }
+
+      $mongo_services = concat($basic_services, $network_services)
+
+      if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' {
+        class {'nagios':
+          services => $mongo_services,
+          proj_name => 'xifi-monitoring',
+          whitelist => [$::osnailyfacter::cluster_simple::monitoring_node_address],
+          hostgroup => 'mongo-nodes'
+            }
+
+        }
     }
     # MONGO ENDS
 
@@ -695,6 +714,25 @@ class osnailyfacter::cluster_simple {
         use_syslog                  => $use_syslog,
         set_parameter               => $mongo_set_parameter,
       }
+
+      $basic_services = ['keystone', 'nova-scheduler', 'cinder-scheduler','memcached','nova-api','cinder-api','glance-api','glance-registry','horizon', 'mysql']
+      $network_services = $::use_quantum ? {
+        true  => ['neutron',],
+        false => ['nova-conductor',],
+        default => ['nova-conductor',]
+      }
+
+      $mongo_services = concat($basic_services, $network_services)
+
+      if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' {
+        class {'nagios':
+          services => $mongo_services,
+          proj_name => 'xifi-monitoring',
+          whitelist => [$::osnailyfacter::cluster_simple::monitoring_node_address],
+          hostgroup => 'mongo-nodes'
+            }
+      }
+
     } # PRIMARY-MONGO ENDS
 
 #    "mongo" : {
@@ -762,6 +800,18 @@ class osnailyfacter::cluster_simple {
       #Nothing needs to be done Class Ceph is already defined
       notify {"ceph-osd: ${::ceph::osd_devices}": }
       notify {"osd_devices:  ${::osd_devices_list}": }
+
+      #ADDONS XIFI START
+      if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' {
+        class {'nagios':
+               proj_name        => 'xifi-monitoring',
+               services         => ['ceph_osd'],
+               whitelist        => [$::osnailyfacter::cluster_simple::monitoring_node_address],
+               hostgroup        => 'volume-ceph-nodes'
+        }
+      }
+      #ADDONS XIFI END
+
     } #CEPH_OSD ENDS
 
   } # ROLE CASE ENDS
