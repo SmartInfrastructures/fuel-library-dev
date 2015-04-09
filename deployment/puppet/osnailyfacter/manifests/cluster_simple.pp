@@ -634,21 +634,14 @@ class osnailyfacter::cluster_simple {
         set_parameter               => $mongo_set_parameter,
       }
 
-      $basic_services = ['keystone', 'nova-scheduler', 'cinder-scheduler','memcached','nova-api','cinder-api','glance-api','glance-registry','horizon', 'mysql']
-      $network_services = $::use_quantum ? {
-        true  => ['neutron',],
-        false => ['nova-conductor',],
-        default => ['nova-conductor',]
-      }
-
-      $mongo_services = concat($basic_services, $network_services)
+      $mongodb_services = ['mongodb']
 
       if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' {
         class {'nagios':
-          services => $mongo_services,
+          services => $mongodb_services,
           proj_name => 'xifi-monitoring',
           whitelist => [$::osnailyfacter::cluster_simple::monitoring_node_address],
-          hostgroup => 'mongo-nodes'
+          hostgroup => 'mongodb-nodes'
             }
 
         }
@@ -715,21 +708,14 @@ class osnailyfacter::cluster_simple {
         set_parameter               => $mongo_set_parameter,
       }
 
-      $basic_services = ['keystone', 'nova-scheduler', 'cinder-scheduler','memcached','nova-api','cinder-api','glance-api','glance-registry','horizon', 'mysql']
-      $network_services = $::use_quantum ? {
-        true  => ['neutron',],
-        false => ['nova-conductor',],
-        default => ['nova-conductor',]
-      }
-
-      $mongo_services = concat($basic_services, $network_services)
+      $mongodb_services = ['mongodb']
 
       if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' {
         class {'nagios':
-          services => $mongo_services,
+          services => $mongodb_services,
           proj_name => 'xifi-monitoring',
           whitelist => [$::osnailyfacter::cluster_simple::monitoring_node_address],
-          hostgroup => 'mongo-nodes'
+          hostgroup => 'mongodb-nodes'
             }
       }
 
