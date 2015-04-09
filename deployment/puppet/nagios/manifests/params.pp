@@ -38,6 +38,8 @@ class nagios::params {
     'swap' => 'nrpe_check_swap!20%!10%',
     'user' => 'nrpe_check_users!5!10',
     'memory' => 'nrpe_check_mem!80!90',
+    'ceph-osd' => 'check_nrpe_1arg!check_ceph_osd',
+    'mongodb' => 'check_nrpe_1arg!check_mongodb',
   }
 
   case $::osfamily {

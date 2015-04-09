@@ -85,6 +85,18 @@ $nrpeservice       = $nagios::params::nrpeservice,
 
   }
 
+  if member($services, 'mongodb') == true {
+    package {'nagios-plugin-mongodb':
+      require => Package[$nrpepkg],
+    }
+  }
+
+  if member($services, 'ceph-osd') == true {
+    package {'nagios-plugins-ceph':
+      require => Package[$nrpepkg],
+    }
+  }
+
   File {
     force   => true,
     purge   => true,
