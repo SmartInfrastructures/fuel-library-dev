@@ -770,10 +770,21 @@ class osnailyfacter::cluster_simple {
       }
 
       #ADDONS XIFI START
+
+      $volume_basic_services = ['cinder-volume', ]
+
+      $volume_ceph_services = $::use_ceph ? {
+        true  => ['ceph-osd',],
+        false => [],
+        default => []
+      }
+
+      $volume_services = concat($volume_basic_services, $volume_ceph_services)
+
       if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' {
         class {'nagios':
                proj_name        => 'xifi-monitoring',
-               services         => ['cinder-volume'],
+               services         => $volume_services,
                whitelist        => [$::osnailyfacter::cluster_simple::monitoring_node_address],
                hostgroup        => 'volume-nodes'
         }
@@ -786,17 +797,6 @@ class osnailyfacter::cluster_simple {
       #Nothing needs to be done Class Ceph is already defined
       notify {"ceph-osd: ${::ceph::osd_devices}": }
       notify {"osd_devices:  ${::osd_devices_list}": }
-
-      #ADDONS XIFI START
-      if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' {
-        class {'nagios':
-               proj_name        => 'xifi-monitoring',
-               services         => ['ceph_osd'],
-               whitelist        => [$::osnailyfacter::cluster_simple::monitoring_node_address],
-               hostgroup        => 'volume-ceph-nodes'
-        }
-      }
-      #ADDONS XIFI END
 
     } #CEPH_OSD ENDS
 
