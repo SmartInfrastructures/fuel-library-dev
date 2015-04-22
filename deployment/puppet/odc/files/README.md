@@ -1,3 +1,11 @@
+openstack-data-collector
+========================
+Release 27/01/2015 (AB-openstackDataCollector + implemented log file rotation)
+
+Release 15/01/2015 (AB-openstackDataCollector + timeInterval for polling set to 5 mins+added hostId for vms+fix for Nova endpoint url)
+
+Release 24/12/2014 (AB-openstackDataCollector + added calls to Nova API)
+
 Release 06/06/2014 (AB-openstackDataCollector + added timeSample)
 
 Release 05/06/2014 (AB-openstackDataCollector + fix if not found)
@@ -56,4 +64,3 @@ This repository is composed by 2 files:
 
 Copyright 2014 Create-net.org
 All Rights Reserved.
-
