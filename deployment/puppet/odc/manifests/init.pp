@@ -9,7 +9,8 @@ class odc (
 	  $location = 'changeit',
 	  $latitude = '42.00',
 	  $longitude = '11.00',
-	  $agent_url = 'changeit') {
+	  $agent_url = 'changeit',
+	  $public_ext_net = 'public-ext-01') {
 	
 	notify { "odc_message":
 		message => "OpenStackDataCollector installation"
@@ -74,6 +75,9 @@ class odc (
             }->
 	file_line  { 'odc_config_10':
 			line => "agentUrl=${agent_url}",
+			path => '/home/osdatacollector/odc.conf'
+	file_line  { 'odc_config_11':
+			line => "public_ext_net=${public_ext_net}",
 			path => '/home/osdatacollector/odc.conf'
             }->
 	exec { "run_osd":

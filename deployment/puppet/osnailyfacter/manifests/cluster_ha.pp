@@ -442,6 +442,7 @@ class osnailyfacter::cluster_ha {
                       latitude        =>      $federation_hash[latitude],
                       longitude       =>      $federation_hash[longitude],
                       agent_url       =>      "${monitoring_node_public}:1337/",
+                      public_ext_net  =>      $federation_hash[public_ext_net],
             }
    }
 
