@@ -591,6 +591,23 @@ class osnailyfacter::cluster_simple {
         include dcrm::compute_pulsar
       }
 
+      # OpenStack Data Collector
+      if $monitoring_hash['odc'] {
+        class {'odc':
+          username        =>      'nova',
+          password        =>      $nova_hash[user_password],
+          tenant_name     =>      'services',
+          auth_url        =>      '127.0.0.1:35357/v2.0',
+          token           =>      $keystone_hash[admin_token],
+          region_name     =>      $federation_hash[region_name],
+          region_id       =>      $federation_hash[region_id],
+          location        =>      $federation_hash[country],
+          latitude        =>      $federation_hash[latitude],
+          longitude       =>      $federation_hash[longitude],
+          agent_url       =>      "${monitoring_node_public}:1337/",
+          public_ext_net  =>      $federation_hash[public_ext_net],
+        }
+      }
 
       if $monitoring_hash and $monitoring_hash['monitoring_server'] == 'nagios' {
         $basic_services = ['nova-compute','libvirt']
