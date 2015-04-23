@@ -76,6 +76,7 @@ class odc (
 	file_line  { 'odc_config_10':
 			line => "agentUrl=${agent_url}",
 			path => '/home/osdatacollector/odc.conf'
+            }->
 	file_line  { 'odc_config_11':
 			line => "public_ext_net=${public_ext_net}",
 			path => '/home/osdatacollector/odc.conf'
