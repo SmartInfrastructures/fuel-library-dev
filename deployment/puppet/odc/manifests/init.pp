@@ -15,6 +15,8 @@ class odc (
 	notify { "odc_message":
 		message => "OpenStackDataCollector installation"
 	}->
+        package {'python-pycurl':
+          }->
 	file {  "/home/osdatacollector/":
               ensure => "directory",
               mode => 755
