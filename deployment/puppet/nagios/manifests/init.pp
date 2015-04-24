@@ -95,6 +95,14 @@ $nrpeservice       = $nagios::params::nrpeservice,
     package {'nagios-plugins-ceph':
       require => Package[$nrpepkg],
     }
+    # Fix permission to allow nagios to connect to ceph
+    # For sure there should be a smart less privileged way!
+    file { "/etc/ceph/ceph.keyring":
+      source => '/root/ceph.client.admin.keyring',
+      owner => "nagios",
+      group => "root",
+      mode    => '0400',
+    }
   }
 
   File {
