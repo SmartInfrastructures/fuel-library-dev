@@ -103,6 +103,14 @@ $nrpeservice       = $nagios::params::nrpeservice,
       group => "root",
       mode    => '0400',
     }
+
+    file { "/usr/local/sbin/check_ceph_osd_helper":
+      content => "#!/bin/sh\nexec /usr/lib/nagios/plugins/check_ceph_osd -H `hostname`",
+      owner => "root",
+      group => "root",
+      mode    => '0755',
+    }
+
   }
 
   File {
