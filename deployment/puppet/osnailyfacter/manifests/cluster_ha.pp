@@ -30,6 +30,13 @@ class osnailyfacter::cluster_ha {
   } else {
     $monitoring_hash = $::fuel_settings['monitoring']
   }
+
+  if !$::fuel_settings['federation'] {
+     $federation_hash = {}
+  } else {
+     $federation_hash = $::fuel_settings['federation']
+  }
+
   # FIWARE-FICORE End
 
   if $cinder_nodes {
@@ -105,12 +112,6 @@ class osnailyfacter::cluster_ha {
   $nodes_hash           = $::fuel_settings['nodes']
   $mp_hash              = $::fuel_settings['mp']
   $network_manager      = "nova.network.manager.${novanetwork_params['network_manager']}"
-
-  if !$::fuel_settings['federation'] {
-     $federation_hash = {}
-  } else {
-     $federation_hash = $::fuel_settings['federation']
-  }
 
   if !$rabbit_hash['user'] {
     $rabbit_hash['user'] = 'nova'

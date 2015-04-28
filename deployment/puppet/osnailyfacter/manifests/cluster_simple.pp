@@ -27,6 +27,12 @@ class osnailyfacter::cluster_simple {
     $monitoring_hash = $::fuel_settings['monitoring']
   }
 
+  if !$::fuel_settings['federation'] {
+     $federation_hash = {}
+  } else {
+     $federation_hash = $::fuel_settings['federation']
+  }
+
   if $fuel_settings['cinder_nodes'] {
      $cinder_nodes_array   = $::fuel_settings['cinder_nodes']
   } else {
@@ -97,11 +103,6 @@ class osnailyfacter::cluster_simple {
   $access_hash          = $::fuel_settings['access']
   $nodes_hash           = $::fuel_settings['nodes']
   $network_manager      = "nova.network.manager.${novanetwork_params['network_manager']}"
-  if !$::fuel_settings['federation'] {
-     $federation_hash = {}
-  } else {
-     $federation_hash = $::fuel_settings['federation']
-  }
 
   if !$rabbit_hash[user] {
     $rabbit_hash[user] = 'nova'
