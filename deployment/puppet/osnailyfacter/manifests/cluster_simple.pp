@@ -596,10 +596,10 @@ class osnailyfacter::cluster_simple {
       if $monitoring_hash['odc'] {
         class {'odc':
           username        =>      'nova',
-          password        =>      $::osnailyfacter::cluster_ha::nova_hash[user_password],
+          password        =>      $::osnailyfacter::cluster_simple::nova_hash[user_password],
           tenant_name     =>      'services',
           auth_url        =>      '127.0.0.1:35357/v2.0',
-          token           =>      $::osnailyfacter::cluster_ha::keystone_hash[admin_token],
+          token           =>      $::osnailyfacter::cluster_simple::keystone_hash[admin_token],
           region_name     =>      $federation_hash[region_name],
           region_id       =>      $federation_hash[region_id],
           location        =>      $federation_hash[country],
